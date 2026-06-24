@@ -1,349 +1,1206 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HUBLINE — Team Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg-0:#0b0d12;
-    --bg-1:#11141b;
-    --bg-2:#171b24;
-    --line:#262b36;
-    --ink:#e7e9ee;
-    --ink-dim:#8b93a3;
-    --accent:#3ddc97;
-    --accent-dim:#1f5e44;
-    --warn:#ff6b6b;
-    --gold:#e8b34c;
-    --mono:'IBM Plex Mono','Courier New',monospace;
-    --sans:'Inter','Segoe UI',sans-serif;
+  :root {
+    --bg-0: #07090e;
+    --bg-1: #0e1118;
+    --bg-2: #161b26;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-active: rgba(61, 220, 151, 0.25);
+    --ink: #f1f3f7;
+    --ink-dim: #9ba3b2;
+    --ink-deep: #4c5465;
+    --accent: #3ddc97;
+    --accent-hover: #52e8ab;
+    --accent-dim: rgba(61, 220, 151, 0.08);
+    --accent-glow: rgba(61, 220, 151, 0.25);
+    --warn: #ff6b6b;
+    --warn-dim: rgba(255, 107, 107, 0.08);
+    --gold: #f3c468;
+    --gold-dim: rgba(243, 196, 104, 0.08);
+    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+    --sans: 'Inter', 'Segoe UI', sans-serif;
+    --display: 'Outfit', sans-serif;
   }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;height:100vh;overflow:hidden;
-    background:var(--bg-0);
-    color:var(--ink);
-    font-family:var(--sans);
+
+  * { box-sizing: border-box; }
+  
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--ink-deep);
+  }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg-0);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Utilities */
+  .fade-in {
+    animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* ===================== LOGIN ===================== */
-  #loginScreen{
-    position:fixed;inset:0;
-    display:flex;align-items:center;justify-content:center;
+  #loginScreen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background:
-      radial-gradient(circle at 20% 20%, rgba(61,220,151,0.06), transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(232,179,76,0.05), transparent 45%),
+      radial-gradient(circle at 10% 10%, rgba(61,220,151,0.04), transparent 45%),
+      radial-gradient(circle at 90% 90%, rgba(243,196,104,0.03), transparent 50%),
       var(--bg-0);
-    z-index:100;
+    z-index: 100;
   }
-  .login-card{
-    width:400px;
-    background:var(--bg-1);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:36px 32px 28px;
-    box-shadow:0 30px 60px rgba(0,0,0,0.55);
+  
+  .login-card {
+    width: 420px;
+    background: rgba(14, 17, 24, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 40px 36px 32px;
+    box-shadow: 
+      0 4px 30px rgba(0, 0, 0, 0.4),
+      0 24px 70px rgba(0, 0, 0, 0.6);
   }
-  .login-brand{
-    display:flex;align-items:center;gap:10px;margin-bottom:6px;
-  }
-  .login-brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);}
-  .login-brand span{font-family:var(--mono);font-weight:700;letter-spacing:2px;font-size:14px;color:var(--ink);}
-  .login-sub{font-size:12px;color:var(--ink-dim);margin-bottom:22px;letter-spacing:0.5px;}
 
-  .login-mode-toggle{
-    display:flex;background:var(--bg-2);border:1px solid var(--line);
-    border-radius:8px;padding:3px;margin-bottom:22px;
+  .login-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
   }
-  .login-mode-toggle button{
-    flex:1;background:transparent;border:none;color:var(--ink-dim);
-    padding:8px 0;font-size:12px;font-weight:700;letter-spacing:0.5px;
-    border-radius:6px;cursor:pointer;font-family:var(--sans);
+  
+  .login-brand .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 14px var(--accent);
+    animation: pulseGlow 2.5s infinite alternate;
   }
-  .login-mode-toggle button.active{background:var(--accent);color:#06150e;}
+  
+  @keyframes pulseGlow {
+    from { box-shadow: 0 0 8px var(--accent); opacity: 0.8; }
+    to { box-shadow: 0 0 20px var(--accent); opacity: 1; }
+  }
 
-  .field{margin-bottom:14px;}
-  .field label{
-    display:block;font-size:11px;color:var(--ink-dim);
-    letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;
-    font-family:var(--mono);
+  .login-brand span {
+    font-family: var(--display);
+    font-weight: 800;
+    letter-spacing: 2px;
+    font-size: 18px;
+    color: var(--ink);
   }
-  .field input{
-    width:100%;padding:11px 12px;
-    background:var(--bg-2);border:1px solid var(--line);
-    border-radius:8px;color:var(--ink);font-size:14px;
-    font-family:var(--mono);outline:none;
-    transition:border-color .15s, box-shadow .15s;
-  }
-  .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(61,220,151,0.12);}
 
-  .login-btn{
-    width:100%;margin-top:8px;padding:12px;
-    background:var(--accent);color:#06150e;border:none;
-    border-radius:8px;font-weight:700;font-size:13px;
-    letter-spacing:1px;cursor:pointer;font-family:var(--mono);
-    transition:transform .12s, background .15s;
+  .login-sub {
+    font-size: 13px;
+    color: var(--ink-dim);
+    margin-bottom: 24px;
+    letter-spacing: 0.5px;
   }
-  .login-btn:hover{background:#52e8ab;transform:translateY(-1px);}
-  .login-btn:active{transform:translateY(0);}
-  .login-error{
-    margin-top:12px;font-size:12px;color:var(--warn);
-    font-family:var(--mono);display:none;
+
+  .login-mode-toggle {
+    display: flex;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 24px;
   }
-  .login-foot{
-    margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
-    font-size:11px;color:var(--ink-dim);line-height:1.6;
+
+  .login-mode-toggle button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--ink-dim);
+    padding: 10px 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.2s ease;
+  }
+
+  .login-mode-toggle button.active {
+    background: var(--accent);
+    color: #06150e;
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-family: var(--mono);
+    font-weight: 500;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--ink);
+    font-size: 14px;
+    font-family: var(--mono);
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(61, 220, 151, 0.15);
+    background: var(--bg-0);
+  }
+
+  .login-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 13px;
+    background: var(--accent);
+    color: #06150e;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    font-family: var(--mono);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+
+  .login-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(61, 220, 151, 0.35);
+  }
+
+  .login-btn:active {
+    transform: translateY(1px);
+  }
+
+  .login-error {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--warn);
+    font-family: var(--mono);
+    display: none;
+    padding: 8px 12px;
+    background: var(--warn-dim);
+    border: 1px solid rgba(255, 107, 107, 0.15);
+    border-radius: 8px;
+  }
+
+  .login-foot {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--ink-dim);
+    line-height: 1.6;
   }
 
   /* ===================== APP SHELL ===================== */
-  #app{display:none;height:100vh;flex-direction:column;}
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:10px 20px;background:var(--bg-1);
-    border-bottom:1px solid var(--line);
-    flex-shrink:0;
+  #app {
+    display: none;
+    height: 100vh;
+    flex-direction: column;
   }
-  .topbar-left{display:flex;align-items:center;gap:14px;}
-  .brand-mini{display:flex;align-items:center;gap:8px;}
-  .brand-mini .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
-  .brand-mini span{font-family:var(--mono);font-weight:700;letter-spacing:1.5px;font-size:13px;}
-  .org-pill{
-    font-family:var(--mono);font-size:11px;color:var(--ink-dim);
-    background:var(--bg-2);border:1px solid var(--line);
-    padding:4px 10px;border-radius:20px;
-  }
-  .tabs{display:flex;gap:4px;}
-  .tab-btn{
-    background:transparent;border:none;color:var(--ink-dim);
-    padding:8px 16px;border-radius:7px;font-size:13px;
-    cursor:pointer;font-family:var(--sans);font-weight:600;
-    transition:all .15s;
-  }
-  .tab-btn:hover{color:var(--ink);background:var(--bg-2);}
-  .tab-btn.active{color:#06150e;background:var(--accent);}
-  .topbar-right{display:flex;align-items:center;gap:12px;}
-  .user-chip{
-    display:flex;align-items:center;gap:8px;
-    font-size:12px;color:var(--ink-dim);font-family:var(--mono);
-  }
-  .role-badge{
-    font-size:10px;padding:2px 8px;border-radius:10px;
-    border:1px solid var(--gold);color:var(--gold);
-    letter-spacing:1px;
-  }
-  .role-badge.member{border-color:var(--accent);color:var(--accent);}
-  .logout-btn{
-    background:transparent;border:1px solid var(--line);
-    color:var(--ink-dim);padding:6px 12px;border-radius:7px;
-    font-size:12px;cursor:pointer;font-family:var(--mono);
-  }
-  .logout-btn:hover{color:var(--warn);border-color:var(--warn);}
 
-  .view{flex-grow:1;overflow:auto;display:none;}
-  .view.active{display:flex;flex-direction:column;}
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(14, 17, 24, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .brand-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-mini .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .brand-mini span {
+    font-family: var(--display);
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    font-size: 14px;
+  }
+
+  .org-pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--ink-dim);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn:hover {
+    color: var(--ink);
+    background: var(--bg-2);
+  }
+
+  .tab-btn.active {
+    color: #06150e;
+    background: var(--accent);
+    box-shadow: 0 4px 10px var(--accent-glow);
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    font-family: var(--mono);
+  }
+
+  .role-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: var(--gold-dim);
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+
+  .role-badge.member {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .logout-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--mono);
+    transition: all 0.2s ease;
+  }
+
+  .logout-btn:hover {
+    color: var(--warn);
+    border-color: var(--warn);
+    background: var(--warn-dim);
+  }
+
+  .view {
+    flex-grow: 1;
+    overflow: auto;
+    display: none;
+  }
+
+  .view.active {
+    display: flex;
+    flex-direction: column;
+  }
 
   /* ===================== MAIL VIEW ===================== */
-  #mailView{flex-direction:row;height:100%;}
-  .mail-sidebar{
-    width:220px;background:var(--bg-1);border-right:1px solid var(--line);
-    padding:18px 12px;flex-shrink:0;display:flex;flex-direction:column;
+  #mailView {
+    flex-direction: row;
+    height: 100%;
   }
-  .compose-btn{
-    background:var(--accent);color:#06150e;border:none;
-    padding:11px;border-radius:9px;font-weight:700;font-size:13px;
-    cursor:pointer;margin-bottom:18px;font-family:var(--sans);
-  }
-  .compose-btn:hover{background:#52e8ab;}
-  .mail-nav-item{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:9px 12px;border-radius:7px;color:var(--ink-dim);
-    font-size:13px;cursor:pointer;margin-bottom:2px;
-  }
-  .mail-nav-item:hover{background:var(--bg-2);color:var(--ink);}
-  .mail-nav-item.active{background:var(--bg-2);color:var(--accent);font-weight:600;}
-  .mail-nav-item .count{
-    font-family:var(--mono);font-size:11px;
-    background:var(--accent-dim);color:var(--accent);
-    padding:1px 7px;border-radius:9px;
-  }
-  .mail-list{
-    width:340px;border-right:1px solid var(--line);
-    overflow-y:auto;flex-shrink:0;background:var(--bg-0);
-  }
-  .mail-item{
-    padding:14px 18px;border-bottom:1px solid var(--line);
-    cursor:pointer;transition:background .1s;
-  }
-  .mail-item:hover{background:var(--bg-2);}
-  .mail-item.selected{background:var(--bg-2);border-left:3px solid var(--accent);}
-  .mail-item.unread .mail-from{font-weight:700;color:var(--ink);}
-  .mail-item.unread .mail-subject{font-weight:600;color:var(--ink);}
-  .mail-from{font-size:13px;color:var(--ink-dim);margin-bottom:4px;}
-  .mail-subject{font-size:13px;color:var(--ink-dim);margin-bottom:4px;}
-  .mail-snippet{font-size:12px;color:#5d6473;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .mail-time{float:right;font-size:11px;color:#5d6473;font-family:var(--mono);}
 
-  .mail-reading{flex-grow:1;overflow-y:auto;padding:28px 36px;}
-  .mail-reading-empty{
-    flex-grow:1;display:flex;align-items:center;justify-content:center;
-    color:#3a4150;font-family:var(--mono);font-size:13px;letter-spacing:1px;
+  .mail-sidebar {
+    width: 230px;
+    background: var(--bg-1);
+    border-right: 1px solid var(--line);
+    padding: 20px 14px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
   }
-  .mail-subject-lg{font-size:20px;font-weight:700;margin-bottom:18px;}
-  .mail-meta{
-    display:flex;justify-content:space-between;align-items:center;
-    border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px;
+
+  .compose-btn {
+    background: var(--accent);
+    color: #06150e;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-family: var(--sans);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px var(--accent-glow);
   }
-  .mail-meta-from{font-size:13px;color:var(--ink-dim);}
-  .mail-meta-from b{color:var(--ink);}
-  .mail-body{font-size:14px;line-height:1.8;color:#cfd3dc;white-space:pre-wrap;}
-  .mail-actions{display:flex;gap:10px;margin-top:24px;}
-  .mail-actions button{
-    background:var(--bg-2);border:1px solid var(--line);color:var(--ink);
-    padding:9px 18px;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--sans);font-weight:600;
+
+  .compose-btn:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 6px 14px rgba(61, 220, 151, 0.3);
+    transform: translateY(-1px);
   }
-  .mail-actions button:hover{border-color:var(--accent);color:var(--accent);}
+
+  .mail-nav-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--ink-dim);
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .mail-nav-item:hover {
+    background: var(--bg-2);
+    color: var(--ink);
+  }
+
+  .mail-nav-item.active {
+    background: var(--bg-2);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .mail-nav-item .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(61, 220, 151, 0.3);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+
+  .mail-list {
+    width: 360px;
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+    flex-shrink: 0;
+    background: var(--bg-0);
+  }
+
+  .mail-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+  }
+
+  .mail-item:hover {
+    background: var(--bg-2);
+  }
+
+  .mail-item.selected {
+    background: var(--bg-2);
+    border-left-color: var(--accent);
+  }
+
+  .mail-item.unread {
+    background: rgba(61, 220, 151, 0.015);
+  }
+
+  .mail-item.unread .mail-from {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .mail-item.unread .mail-subject {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .mail-from {
+    font-size: 13px;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mail-subject {
+    font-size: 13px;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mail-snippet {
+    font-size: 12px;
+    color: var(--ink-deep);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mail-time {
+    font-size: 11px;
+    color: var(--ink-deep);
+    font-family: var(--mono);
+  }
+
+  .mail-reading {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 32px 40px;
+    background: var(--bg-0);
+  }
+
+  .mail-reading-empty {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-deep);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    gap: 12px;
+  }
+
+  .mail-subject-lg {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+
+  .mail-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+
+  .mail-meta-from {
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+
+  .mail-meta-from b {
+    color: var(--ink);
+  }
+
+  .mail-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #cfd3dc;
+    white-space: pre-wrap;
+    font-family: var(--sans);
+  }
+
+  .mail-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    border-top: 1px solid var(--line);
+    padding-top: 24px;
+  }
+
+  .mail-actions button {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .mail-actions button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
 
   /* compose modal */
-  #composeModal{
-    position:fixed;inset:0;background:rgba(0,0,0,0.55);
-    display:none;align-items:flex-end;justify-content:flex-end;z-index:50;padding:24px;
+  #composeModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 24px;
   }
-  .compose-box{
-    width:560px;background:var(--bg-1);border:1px solid var(--line);
-    border-radius:12px 12px 0 0;box-shadow:0 20px 50px rgba(0,0,0,0.6);
-    display:flex;flex-direction:column;max-height:80vh;
+
+  .compose-box {
+    width: 600px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.65);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    animation: modalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
-  .compose-head{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:12px 18px;background:var(--bg-2);border-radius:12px 12px 0 0;
-    font-size:13px;font-weight:700;
+
+  @keyframes modalSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
-  .compose-head button{background:none;border:none;color:var(--ink-dim);font-size:16px;cursor:pointer;}
-  .compose-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px;}
-  .compose-body input, .compose-body textarea{
-    width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
-    color:var(--ink);font-size:13px;padding:8px 0;outline:none;font-family:var(--sans);
+
+  .compose-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--bg-2);
+    border-radius: 14px 14px 0 0;
+    font-size: 14px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--line);
   }
-  .compose-body textarea{border-bottom:none;resize:none;height:200px;margin-top:6px;font-family:var(--sans);}
-  .compose-foot{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-top:1px solid var(--line);}
-  .send-btn{
-    background:var(--accent);color:#06150e;border:none;border-radius:18px;
-    padding:9px 22px;font-weight:700;font-size:13px;cursor:pointer;
+
+  .compose-head button {
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s;
   }
-  .send-btn:hover{background:#52e8ab;}
-  .compose-note{font-size:10px;color:#5d6473;font-family:var(--mono);}
+
+  .compose-head button:hover {
+    color: var(--warn);
+  }
+
+  .compose-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .compose-body input, .compose-body textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    font-size: 14px;
+    padding: 10px 0;
+    outline: none;
+    font-family: var(--sans);
+    transition: border-color 0.2s;
+  }
+
+  .compose-body input:focus {
+    border-bottom-color: var(--accent);
+  }
+
+  .compose-body textarea {
+    border-bottom: none;
+    resize: none;
+    height: 250px;
+    margin-top: 10px;
+    font-family: var(--sans);
+    line-height: 1.6;
+  }
+
+  .compose-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-1);
+    border-radius: 0 0 14px 14px;
+  }
+
+  .send-btn {
+    background: var(--accent);
+    color: #06150e;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 26px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px var(--accent-glow);
+    transition: all 0.2s ease;
+  }
+
+  .send-btn:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 6px 14px rgba(61, 220, 151, 0.35);
+  }
+
+  .compose-note {
+    font-size: 10px;
+    color: var(--ink-deep);
+    font-family: var(--mono);
+  }
 
   /* ===================== MEMBERS VIEW ===================== */
-  #membersView{padding:28px 36px;overflow-y:auto;}
-  .section-title{font-size:13px;letter-spacing:1.5px;color:var(--ink-dim);font-family:var(--mono);margin-bottom:16px;text-transform:uppercase;}
-  .members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
-  .member-card{
-    background:var(--bg-1);border:1px solid var(--line);border-radius:10px;padding:16px;
-    display:flex;flex-direction:column;gap:8px;
+  #membersView {
+    padding: 32px 40px;
+    overflow-y: auto;
   }
-  .member-top{display:flex;justify-content:space-between;align-items:center;}
-  .member-name{font-weight:700;font-size:14px;}
-  .status-dot{width:8px;height:8px;border-radius:50%;}
-  .status-dot.online{background:var(--accent);box-shadow:0 0 6px var(--accent);}
-  .status-dot.away{background:#5d6473;}
-  .member-role{font-size:11px;color:var(--ink-dim);font-family:var(--mono);}
-  .member-note{font-size:11px;color:#5d6473;}
+
+  .section-title {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+  }
+
+  .member-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .member-card:hover {
+    border-color: var(--accent-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .member-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .member-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .status-dot.online {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .status-dot.away {
+    background: var(--ink-deep);
+  }
+
+  .member-role {
+    font-size: 11px;
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+
+  .member-note {
+    font-size: 11px;
+    color: var(--ink-deep);
+    line-height: 1.5;
+  }
 
   /* ===================== ADMIN VIEW ===================== */
-  #adminView{padding:28px 36px;overflow-y:auto;}
-  .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
-  .admin-card{
-    background:var(--bg-1);border:1px solid var(--line);border-radius:12px;padding:22px;
+  #adminView {
+    padding: 32px 40px;
+    overflow-y: auto;
   }
-  .admin-card h3{margin:0 0 4px;font-size:14px;}
-  .admin-card .sub{font-size:12px;color:var(--ink-dim);margin-bottom:18px;}
-  .admin-card .field input, .admin-card .field select{
-    width:100%;padding:10px 12px;background:var(--bg-2);border:1px solid var(--line);
-    border-radius:7px;color:var(--ink);font-size:13px;font-family:var(--mono);outline:none;
+
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
   }
-  .admin-card .field{margin-bottom:12px;}
-  .admin-create-btn{
-    background:var(--gold);color:#1c1305;border:none;border-radius:8px;
-    padding:10px 18px;font-weight:700;font-size:12px;cursor:pointer;font-family:var(--sans);width:100%;
+
+  .admin-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
   }
-  .admin-create-btn:hover{background:#f3c468;}
-  .code-table{width:100%;border-collapse:collapse;margin-top:6px;}
-  .code-table th{
-    text-align:left;font-size:10px;color:var(--ink-dim);text-transform:uppercase;
-    letter-spacing:0.5px;padding:6px 8px;border-bottom:1px solid var(--line);font-family:var(--mono);
+
+  .admin-card h3 {
+    margin: 0 0 6px;
+    font-family: var(--display);
+    font-size: 16px;
+    color: var(--ink);
   }
-  .code-table td{
-    font-size:12px;padding:8px 8px;border-bottom:1px solid var(--line);font-family:var(--mono);
+
+  .admin-card .sub {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-bottom: 20px;
+    line-height: 1.5;
   }
-  .code-pill{
-    background:var(--bg-2);border:1px solid var(--line);border-radius:5px;
-    padding:2px 8px;color:var(--accent);
+
+  .admin-create-btn {
+    background: var(--gold);
+    color: #1c1305;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--sans);
+    width: 100%;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px var(--gold-dim);
   }
-  .admin-note{
-    font-size:11px;color:var(--ink-dim);line-height:1.6;margin-top:14px;
-    border-top:1px solid var(--line);padding-top:12px;
+
+  .admin-create-btn:hover {
+    background: #f8cf7e;
+    box-shadow: 0 6px 14px rgba(243, 196, 104, 0.3);
+  }
+
+  .code-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  .code-table th {
+    text-align: left;
+    font-size: 10px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+  }
+
+  .code-table td {
+    font-size: 12px;
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    color: var(--ink);
+  }
+
+  .code-pill {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px 10px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .admin-note {
+    font-size: 11px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    margin-top: 18px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
   }
 
   /* ===================== MONITOR (CAMERA/SHARE) VIEW ===================== */
-  #monitorView{padding:18px;overflow-y:auto;}
-  .monitor-toolbar{
-    display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:14px;padding:0 6px;
+  #monitorView {
+    padding: 24px;
+    overflow-y: auto;
   }
-  .monitor-hint{font-size:12px;color:var(--ink-dim);max-width:560px;line-height:1.6;}
-  .monitor-hint b{color:var(--accent);}
-  #gridContainer{
-    flex-grow:1;display:grid;gap:16px;
-    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+
+  .monitor-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 6px;
   }
-  .panel{
-    background:var(--bg-1);border:1px solid var(--line);border-radius:12px;
-    display:flex;flex-direction:column;overflow:hidden;
-    box-shadow:0 10px 25px rgba(0,0,0,0.35);
+
+  .monitor-hint {
+    font-size: 12px;
+    color: var(--ink-dim);
+    max-width: 600px;
+    line-height: 1.6;
   }
-  .panel-header{
-    background:var(--bg-2);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;
-    border-bottom:1px solid var(--line);
+
+  .monitor-hint b {
+    color: var(--accent);
   }
-  .panel-title{font-size:12px;font-weight:700;color:var(--ink-dim);font-family:var(--mono);}
-  .panel-owner{font-size:11px;color:#5d6473;}
-  .btn-close-x{background:none;border:none;color:var(--warn);cursor:pointer;font-size:14px;}
-  .video-container{padding:10px;background:rgba(0,0,0,0.25);}
-  .video-wrapper{
-    position:relative;width:100%;aspect-ratio:16/9;background:#04050a;
-    border-radius:7px;overflow:hidden;border:1px solid #1a1d26;
+
+  #gridContainer {
+    flex-grow: 1;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   }
-  video{width:100%;height:100%;object-fit:cover;}
-  .status-text{
-    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    color:rgba(255,255,255,0.18);font-size:13px;font-weight:700;letter-spacing:3px;font-family:var(--mono);
+
+  .panel {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    transition: border-color 0.2s;
   }
-  .video-badge{
-    position:absolute;top:8px;left:8px;padding:3px 8px;font-size:10px;font-family:var(--mono);
-    font-weight:700;border-radius:4px;display:none;
+
+  .panel:hover {
+    border-color: var(--line-active);
   }
-  .controls-wrapper{display:flex;flex-direction:column;gap:8px;padding:0 12px 12px;}
-  .controls-video{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
-  button.ctrl{
-    background:var(--bg-2);color:var(--ink);border:1px solid var(--line);
-    padding:7px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-weight:600;font-family:var(--sans);
+
+  .panel-header {
+    background: var(--bg-2);
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
   }
-  button.ctrl:hover{border-color:var(--accent);color:var(--accent);}
-  button.ctrl:disabled{opacity:0.35;cursor:not-allowed;}
-  .btn-record{background:#3a1f23;border-color:#5c2a30;color:#ff9b9b;}
-  .btn-record.recording{background:var(--gold);color:#1c1305;animation:blink 1s infinite alternate;}
-  @keyframes blink{from{opacity:1;}to{opacity:0.55;}}
-  .add-panel-btn{
-    background:transparent;border:1px dashed var(--line);color:var(--ink-dim);
-    border-radius:12px;display:flex;align-items:center;justify-content:center;
-    min-height:200px;cursor:pointer;font-size:13px;font-family:var(--mono);
+
+  .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-dim);
+    font-family: var(--mono);
   }
-  .add-panel-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  .panel-owner {
+    font-size: 11px;
+    color: var(--ink-deep);
+  }
+
+  .btn-close-x {
+    background: none;
+    border: none;
+    color: var(--warn);
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.2s;
+  }
+
+  .btn-close-x:hover {
+    transform: scale(1.15);
+  }
+
+  .video-container {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #04050a;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .status-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--ink-deep);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: var(--mono);
+  }
+
+  .video-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-family: var(--mono);
+    font-weight: 700;
+    border-radius: 6px;
+    display: none;
+    z-index: 2;
+  }
+
+  .controls-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 16px 16px;
+  }
+
+  .controls-video {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  button.ctrl {
+    background: var(--bg-2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 11px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: var(--sans);
+    transition: all 0.2s ease;
+  }
+
+  button.ctrl:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  button.ctrl:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: var(--bg-1);
+    border-color: var(--line);
+    color: var(--ink-dim);
+  }
+
+  .btn-record {
+    background: rgba(255, 107, 107, 0.08);
+    border-color: rgba(255, 107, 107, 0.2);
+    color: #ff9b9b;
+  }
+  
+  .btn-record:hover {
+    background: rgba(255, 107, 107, 0.15) !important;
+    border-color: var(--warn) !important;
+    color: var(--warn) !important;
+  }
+
+  .btn-record.recording {
+    background: var(--gold) !important;
+    border-color: var(--gold) !important;
+    color: #1c1305 !important;
+    animation: blink 1s infinite alternate;
+  }
+
+  @keyframes blink {
+    from { opacity: 1; }
+    to { opacity: 0.6; }
+  }
+
+  .add-panel-btn {
+    background: transparent;
+    border: 1.5px dashed var(--line);
+    color: var(--ink-dim);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--mono);
+    transition: all 0.2s ease;
+  }
+
+  .add-panel-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* ===================== TOAST NOTIFICATIONS ===================== */
+  .toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  .toast {
+    pointer-events: auto;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    min-width: 280px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(14, 17, 24, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .toast-success { border-color: var(--accent); }
+  .toast-success .toast-icon { color: var(--accent); }
+  
+  .toast-error { border-color: var(--warn); }
+  .toast-error .toast-icon { color: var(--warn); }
+
+  .toast-warning { border-color: var(--gold); }
+  .toast-warning .toast-icon { color: var(--gold); }
+
+  .toast-icon {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  /* Reset Button */
+  .reset-link {
+    display: inline-block;
+    margin-top: 12px;
+    color: var(--ink-deep);
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+
+  .reset-link:hover {
+    color: var(--warn);
+  }
 </style>
 </head>
 <body>
+
+<!-- ============== TOAST CONTAINER ============== -->
+<div class="toast-container" id="toastContainer"></div>
 
 <!-- ============== LOGIN SCREEN ============== -->
 <div id="loginScreen">
@@ -394,16 +1251,17 @@
     <div class="login-foot" id="memberLoginFoot">
       Signing in adds you to the workspace under your own name.<br>
       No member can access another member's mail, camera, or screen without that person's own action.
-      <div style="margin-top:10px;">
+      <div style="margin-top:12px; display: flex; justify-content: space-between; align-items: center;">
         <a href="#" onclick="openJoinRequest();return false;" style="color:var(--accent);text-decoration:none;font-weight:600;">Request to join a workspace →</a>
+        <span class="reset-link" onclick="confirmReset()">Reset App Data</span>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ============== JOIN REQUEST MODAL ============== -->
-<div id="joinRequestModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:110;">
-  <div class="login-card" style="width:380px;">
+<div id="joinRequestModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:110;">
+  <div class="login-card" style="width:400px; animation: modalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;">
     <div class="login-brand"><span class="dot"></span><span>HUBLINE</span></div>
     <div class="login-sub">Request to Join a Workspace</div>
 
@@ -429,7 +1287,7 @@
 
     <div class="login-foot">
       Your request is sent to the workspace boss's inbox. You'll be able to sign in once a boss approves it.
-      <div style="margin-top:10px;">
+      <div style="margin-top:12px;">
         <a href="#" onclick="closeJoinRequest();return false;" style="color:var(--ink-dim);text-decoration:none;">← Back to sign in</a>
       </div>
     </div>
@@ -469,7 +1327,10 @@
     </div>
     <div class="mail-list" id="mailList"></div>
     <div class="mail-reading" id="mailReading">
-      <div class="mail-reading-empty">Select an email to read</div>
+      <div class="mail-reading-empty">
+        <span>✉</span>
+        <span>Select an email to read</span>
+      </div>
     </div>
   </div>
 
@@ -481,7 +1342,10 @@
 
   <!-- ========== ADMIN VIEW (visible to BOSS role only) ========== -->
   <div id="adminView" class="view">
-    <div class="section-title">Boss Controls</div>
+    <div class="section-title">
+      <span>Boss Controls</span>
+      <span class="reset-link" style="font-size: 11px;" onclick="confirmReset()">Reset App Data (Debug)</span>
+    </div>
     <div class="admin-grid">
       <div class="admin-card">
         <h3>Create Organization Code</h3>
@@ -548,51 +1412,113 @@
 
 <script>
 /* =====================================================================
-   AUTH / WORKSPACE STATE
-   Demo implementation — everything lives in memory and resets on reload.
-   Replace this with a real auth backend for production use.
+   STATE MANAGEMENT (LocalStorage Persistent)
 ===================================================================== */
+const BOSS_PASSWORD = "6090";
 
-const BOSS_PASSWORD = "6090"; // Boss sign-in: organization code + this password only.
-
-// Demo workspace data
-let organizations = [
+// Default seed data
+const DEFAULT_ORGS = [
   { code: "ACME-CORP", name: "Acme Corp" }
 ];
-let groups = [
+const DEFAULT_GROUPS = [
   { code: "SALES-TEAM", orgCode: "ACME-CORP", name: "Sales Team" }
 ];
-const WORKSPACE_MEMBERS = [
+const DEFAULT_MEMBERS = [
   { name: "Alex Carter",  pass: "pass123", role: "BOSS",  org: "ACME-CORP", group: "SALES-TEAM" },
   { name: "Jordan Lee",   pass: "pass123", role: "MEMBER", org: "ACME-CORP", group: "SALES-TEAM" },
   { name: "Sam Rivera",   pass: "pass123", role: "MEMBER", org: "ACME-CORP", group: "SALES-TEAM" },
 ];
-
-let currentUser = null;
-let loginMode = 'member';
-
-/* =====================================================================
-   MAIL — demo internal messaging UI
-   Sending real external email (e.g. via Gmail) would require each
-   member's own OAuth login and a separate email API integration.
-===================================================================== */
-let mailbox = {
-  inbox: [
-    { from:"Alex Carter", subject:"Next week's standup", snippet:"Moved to Tuesday at 2pm.", body:"Hi team,\n\nNext week's standup has moved to Tuesday at 2pm.\nAgenda to follow shortly.\n\nAlex", time:"09:12", unread:true },
-    { from:"Sam Rivera", subject:"Could you review the proposal?", snippet:"Draft is ready for your feedback", body:"Hi,\n\nThe draft proposal we discussed is ready.\nCould you take a look when you have a moment?\n\nSam", time:"Yesterday", unread:false },
-  ],
-  sent: []
+const DEFAULT_MAILBOXES = {
+  "Alex Carter@ACME-CORP": {
+    inbox: [
+      { from: "Sam Rivera", subject: "Could you review the proposal?", snippet: "Draft is ready for your feedback", body: "Hi,\n\nThe draft proposal we discussed is ready.\nCould you take a look when you have a moment?\n\nSam", time: "Yesterday", unread: false }
+    ],
+    sent: [
+      { to: "Sam Rivera", subject: "Next week's standup", snippet: "Moved to Tuesday at 2pm.", body: "Hi team,\n\nNext week's standup has moved to Tuesday at 2pm.\nAgenda to follow shortly.\n\nAlex", time: "09:12", unread: false },
+      { to: "Jordan Lee", subject: "Next week's standup", snippet: "Moved to Tuesday at 2pm.", body: "Hi team,\n\nNext week's standup has moved to Tuesday at 2pm.\nAgenda to follow shortly.\n\nAlex", time: "09:12", unread: false }
+    ]
+  },
+  "Jordan Lee@ACME-CORP": {
+    inbox: [
+      { from: "Alex Carter", subject: "Next week's standup", snippet: "Moved to Tuesday at 2pm.", body: "Hi team,\n\nNext week's standup has moved to Tuesday at 2pm.\nAgenda to follow shortly.\n\nAlex", time: "09:12", unread: true }
+    ],
+    sent: []
+  },
+  "Sam Rivera@ACME-CORP": {
+    inbox: [
+      { from: "Alex Carter", subject: "Next week's standup", snippet: "Moved to Tuesday at 2pm.", body: "Hi team,\n\nNext week's standup has moved to Tuesday at 2pm.\nAgenda to follow shortly.\n\nAlex", time: "09:12", unread: true }
+    ],
+    sent: [
+      { to: "Alex Carter", subject: "Could you review the proposal?", snippet: "Draft is ready for your feedback", body: "Hi,\n\nThe draft proposal we discussed is ready.\nCould you take a look when you have a moment?\n\nSam", time: "Yesterday", unread: false }
+    ]
+  }
 };
+
+// Initialize State
+let organizations = JSON.parse(localStorage.getItem('hubline_orgs')) || DEFAULT_ORGS;
+let groups = JSON.parse(localStorage.getItem('hubline_groups')) || DEFAULT_GROUPS;
+let WORKSPACE_MEMBERS = JSON.parse(localStorage.getItem('hubline_members')) || DEFAULT_MEMBERS;
+let joinRequests = JSON.parse(localStorage.getItem('hubline_requests')) || [];
+let mailboxes = JSON.parse(localStorage.getItem('hubline_mailboxes')) || DEFAULT_MAILBOXES;
+let currentUser = JSON.parse(localStorage.getItem('hubline_current_user')) || null;
+
+let loginMode = 'member';
 let currentFolder = 'inbox';
 let selectedMailIndex = null;
 
+function saveState() {
+  localStorage.setItem('hubline_orgs', JSON.stringify(organizations));
+  localStorage.setItem('hubline_groups', JSON.stringify(groups));
+  localStorage.setItem('hubline_members', JSON.stringify(WORKSPACE_MEMBERS));
+  localStorage.setItem('hubline_requests', JSON.stringify(joinRequests));
+  localStorage.setItem('hubline_mailboxes', JSON.stringify(mailboxes));
+  localStorage.setItem('hubline_current_user', JSON.stringify(currentUser));
+}
+
+function confirmReset() {
+  if (confirm('Are you sure you want to reset all app data back to original defaults?')) {
+    localStorage.clear();
+    showToast('Resetting app data...', 'warning');
+    setTimeout(() => {
+      window.location.reload();
+    }, 1200);
+  }
+}
+
+/* =====================================================================
+   TOAST NOTIFICATION SYSTEM
+===================================================================== */
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  const iconText = type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠';
+  toast.innerHTML = `
+    <span class="toast-icon">${iconText}</span>
+    <span>${message}</span>
+  `;
+  
+  container.appendChild(toast);
+  
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 50);
+  
+  // Auto remove
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3500);
+}
+
 /* =====================================================================
    JOIN REQUESTS
-   A request is just a special inbox item routed to every boss.
-   No code or password is bypassed — bosses still approve manually.
 ===================================================================== */
-let joinRequests = [];
-let joinRequestCounter = 0;
+let joinRequestCounter = joinRequests.length ? Math.max(...joinRequests.map(r => r.id)) : 0;
 
 function openJoinRequest(){
   document.getElementById('joinRequestModal').style.display = 'flex';
@@ -605,7 +1531,7 @@ function closeJoinRequest(){
 function isNameTaken(name){
   const lower = name.trim().toLowerCase();
   const usedByMember = WORKSPACE_MEMBERS.some(m => m.name.toLowerCase() === lower);
-  const usedByRequest = joinRequests.some(r => r.name.toLowerCase() === lower);
+  const usedByRequest = joinRequests.some(r => r.status === 'pending' && r.name.toLowerCase() === lower);
   return usedByMember || usedByRequest;
 }
 
@@ -622,8 +1548,16 @@ function submitJoinRequest(){
     return;
   }
 
+  const orgOk = organizations.some(o => o.code === org);
+  const groupOk = groups.some(g => g.code === group && g.orgCode === org);
+  if(!orgOk || !groupOk){
+    errEl.innerText = 'Specified Organization or Group code does not exist.';
+    errEl.style.display = 'block';
+    return;
+  }
+
   if(isNameTaken(name)){
-    errEl.innerText = 'That name has already been used in this workspace. Please use a different name.';
+    errEl.innerText = 'That name is already in use. Please use a different name.';
     errEl.style.display = 'block';
     return;
   }
@@ -631,10 +1565,11 @@ function submitJoinRequest(){
 
   joinRequestCounter++;
   const id = joinRequestCounter;
-  joinRequests.push({ id, name, org, group, note, status: 'pending', time: 'Now' });
+  const newRequest = { id, name, org, group, note, status: 'pending', time: 'Now' };
+  joinRequests.push(newRequest);
 
-  // Drop it straight into the boss inbox as a join-request message
-  mailbox.inbox.unshift({
+  // Send request mail to BOSS inbox accounts
+  const requestMsg = {
     from: `Join Request — ${name}`,
     subject: `Request to join ${org} / ${group}`,
     snippet: note ? note : `${name} wants to join ${org} / ${group}`,
@@ -643,7 +1578,23 @@ function submitJoinRequest(){
     unread: true,
     isJoinRequest: true,
     requestId: id
+  };
+
+  // Route 1: Target Organization's Boss General Mailbox
+  const bossKey = `Boss@${org}`;
+  if(!mailboxes[bossKey]) mailboxes[bossKey] = { inbox: [], sent: [] };
+  mailboxes[bossKey].inbox.unshift(requestMsg);
+
+  // Route 2: Target any defined Member accounts with role BOSS
+  WORKSPACE_MEMBERS.forEach(m => {
+    if(m.role === 'BOSS' && m.org === org) {
+      const bossMemberKey = `${m.name}@${org}`;
+      if(!mailboxes[bossMemberKey]) mailboxes[bossMemberKey] = { inbox: [], sent: [] };
+      mailboxes[bossMemberKey].inbox.unshift(requestMsg);
+    }
   });
+
+  saveState();
 
   document.getElementById('reqName').value = '';
   document.getElementById('reqOrgCode').value = '';
@@ -651,8 +1602,7 @@ function submitJoinRequest(){
   document.getElementById('reqNote').value = '';
   closeJoinRequest();
 
-  if(typeof renderMailList === 'function') renderMailList();
-  alert('Your request has been sent. A boss will review it in their inbox.');
+  showToast('Your join request has been submitted successfully.');
 }
 
 function approveJoinRequest(requestId){
@@ -662,33 +1612,43 @@ function approveJoinRequest(requestId){
   const orgOk = organizations.some(o => o.code === req.org);
   const groupOk = groups.some(g => g.code === req.group && g.orgCode === req.org);
   if(!orgOk || !groupOk){
-    alert('That organization or group code no longer exists. Create it first in the Boss tab.');
+    showToast('That organization or group code no longer exists.', 'error');
     return;
   }
 
   const nameClash = WORKSPACE_MEMBERS.some(m => m.name.toLowerCase() === req.name.toLowerCase());
   if(nameClash){
-    alert(`"${req.name}" is already a member name in this workspace. Ask them to resubmit with a different name before approving.`);
+    showToast(`"${req.name}" already exists in the workspace.`, 'error');
     return;
   }
 
   const tempPassword = Math.random().toString(36).slice(-8);
   WORKSPACE_MEMBERS.push({ name: req.name, pass: tempPassword, role: 'MEMBER', org: req.org, group: req.group });
+  
   req.status = 'approved';
   req.tempPassword = tempPassword;
 
+  saveState();
   renderMembers();
-  openMail(selectedMailIndex); // refresh the open message
-  alert(`Approved. Temporary password for ${req.name}: ${tempPassword}\n(Share this with them directly — it is not emailed automatically in this demo.)`);
+  openMail(selectedMailIndex); 
+  
+  // Show modal style notification or clear custom pop-up with password details
+  alert(`APPROVED!\nTemporary password for ${req.name}: ${tempPassword}\n\n(Share this password directly with the member as it is not emailed in this demo.)`);
 }
 
 function denyJoinRequest(requestId){
   const req = joinRequests.find(r => r.id === requestId);
   if(!req || req.status !== 'pending') return;
+  
   req.status = 'denied';
+  saveState();
   openMail(selectedMailIndex);
+  showToast('Join request has been denied.', 'warning');
 }
 
+/* =====================================================================
+   AUTHENTICATION / SHELL
+===================================================================== */
 function setLoginMode(mode){
   loginMode = mode;
   document.getElementById('modeMemberBtn').classList.toggle('active', mode === 'member');
@@ -712,6 +1672,7 @@ function attemptLogin(){
     }
     errEl.style.display = 'none';
     currentUser = { name: "Boss", role: "BOSS", org, group: null, isOrgAdmin: true };
+    saveState();
     enterApp();
     return;
   }
@@ -731,13 +1692,14 @@ function attemptLogin(){
   }
   errEl.style.display = 'none';
   currentUser = member;
+  saveState();
   enterApp();
 }
 
 function enterApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
-  document.getElementById('currentUserName').innerText = currentUser.name;
+  document.getElementById('currentUserName').innerText = currentUser.isOrgAdmin ? 'Boss (Admin)' : currentUser.name;
   document.getElementById('currentUserRole').innerText = currentUser.role;
   document.getElementById('currentUserRole').className = 'role-badge ' + (currentUser.role === 'BOSS' ? '' : 'member');
   document.getElementById('orgPillText').innerText = currentUser.group ? `${currentUser.org} / ${currentUser.group}` : currentUser.org;
@@ -747,17 +1709,34 @@ function enterApp(){
   renderMembers();
   renderMailList();
   renderAdminPanel();
+  
   if(document.getElementById('gridContainer').children.length === 0){
     addPanel();
   }
+  showToast(`Logged in to workspace ${currentUser.org}`, 'success');
 }
 
 function logout(){
   currentUser = null;
+  saveState();
+  
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('userPass').value = '';
   document.getElementById('adminPass').value = '';
+  
+  // Clean active video sessions
+  const container = document.getElementById('gridContainer');
+  container.innerHTML = '';
+  panelCount = 0;
+  
+  // Stop streams
+  Object.keys(streams).forEach(id => {
+    if(streams[id]) streams[id].getTracks().forEach(t => t.stop());
+    delete streams[id];
+  });
+  
+  showToast('Logged out successfully.', 'info');
 }
 
 function switchView(viewId, btn){
@@ -768,31 +1747,33 @@ function switchView(viewId, btn){
 }
 
 /* =====================================================================
-   MEMBERS
+   MEMBERS DIRECTORY (Filters by current user organization)
 ===================================================================== */
 function renderMembers(){
   const grid = document.getElementById('membersGrid');
   grid.innerHTML = '';
-  WORKSPACE_MEMBERS.forEach((m, idx) => {
-    const online = idx !== 2; // demo: arbitrary online status
+  
+  const currentOrg = currentUser ? currentUser.org : '';
+  const filtered = WORKSPACE_MEMBERS.filter(m => m.org === currentOrg);
+
+  filtered.forEach((m, idx) => {
+    const isOnline = m.name !== "Jordan Lee"; // Mock active status
     const div = document.createElement('div');
-    div.className = 'member-card';
+    div.className = 'member-card fade-in';
     div.innerHTML = `
       <div class="member-top">
         <span class="member-name">${m.name}</span>
-        <span class="status-dot ${online ? 'online' : 'away'}"></span>
+        <span class="status-dot ${isOnline ? 'online' : 'away'}"></span>
       </div>
-      <span class="member-role">${m.role}</span>
-      <span class="member-note">${online ? 'Online' : 'Away'} · Camera/screen can only be started by this person</span>
+      <span class="member-role">${m.role} (${m.group || 'All Groups'})</span>
+      <span class="member-note">${isOnline ? 'Online' : 'Offline'} · Camera/screen can only be shared by this person</span>
     `;
     grid.appendChild(div);
   });
 }
 
 /* =====================================================================
-   ADMIN PANEL — create organization / group codes
-   Plain, visible boss feature: any boss can see and create these codes.
-   This does NOT grant access to a member's own mail, camera, or screen.
+   BOSS ADMINISTRATIVE TOOLS
 ===================================================================== */
 function renderAdminPanel(){
   const orgSelect = document.getElementById('groupOrgSelect');
@@ -815,54 +1796,74 @@ function slugify(str){
 
 function createOrgCode(){
   const name = document.getElementById('newOrgName').value.trim();
-  if(!name){ alert('Enter an organization name.'); return; }
+  if(!name){ showToast('Enter an organization name.', 'warning'); return; }
   const code = slugify(name);
   if(organizations.some(o => o.code === code)){
-    alert('That organization code already exists.');
+    showToast('That organization code already exists.', 'error');
     return;
   }
   organizations.push({ code, name });
   document.getElementById('newOrgName').value = '';
+  saveState();
   renderAdminPanel();
+  showToast(`Created Organization: ${code}`);
 }
 
 function createGroupCode(){
   const orgCode = document.getElementById('groupOrgSelect').value;
   const name = document.getElementById('newGroupName').value.trim();
-  if(!name){ alert('Enter a group name.'); return; }
+  if(!name){ showToast('Enter a group name.', 'warning'); return; }
   const code = slugify(name);
   if(groups.some(g => g.code === code && g.orgCode === orgCode)){
-    alert('That group code already exists in this organization.');
+    showToast('Group code already exists for this org.', 'error');
     return;
   }
   groups.push({ code, orgCode, name });
   document.getElementById('newGroupName').value = '';
+  saveState();
   renderAdminPanel();
+  showToast(`Created Group: ${code}`);
 }
 
 /* =====================================================================
-   MAIL VIEW RENDERING
+   MAIL & MESSAGE SYSTEM (Individualized)
 ===================================================================== */
+function getUserMailKey(user) {
+  if (!user) return '';
+  return user.isOrgAdmin ? `Boss@${user.org}` : `${user.name}@${user.org}`;
+}
+
 function selectFolder(folder, el){
   currentFolder = folder;
   selectedMailIndex = null;
   document.querySelectorAll('.mail-nav-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
   renderMailList();
-  document.getElementById('mailReading').innerHTML = '<div class="mail-reading-empty">Select an email to read</div>';
+  document.getElementById('mailReading').innerHTML = `
+    <div class="mail-reading-empty">
+      <span>✉</span>
+      <span>Select an email to read</span>
+    </div>
+  `;
 }
 
 function renderMailList(){
   const list = document.getElementById('mailList');
   list.innerHTML = '';
-  const items = mailbox[currentFolder];
-  document.getElementById('inboxCount').innerText = mailbox.inbox.filter(m => m.unread).length;
+  
+  const userKey = getUserMailKey(currentUser);
+  if (!mailboxes[userKey]) {
+    mailboxes[userKey] = { inbox: [], sent: [] };
+  }
+  
+  const items = mailboxes[userKey][currentFolder] || [];
+  document.getElementById('inboxCount').innerText = mailboxes[userKey].inbox.filter(m => m.unread).length;
 
   items.forEach((m, idx) => {
     const div = document.createElement('div');
-    div.className = 'mail-item' + (m.unread ? ' unread' : '') + (selectedMailIndex === idx ? ' selected' : '');
+    div.className = 'mail-item fade-in' + (m.unread ? ' unread' : '') + (selectedMailIndex === idx ? ' selected' : '');
     div.onclick = () => openMail(idx);
-    const reqTag = m.isJoinRequest ? '<span style="font-size:9px;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:1px 5px;margin-right:6px;">REQUEST</span>' : '';
+    const reqTag = m.isJoinRequest ? '<span style="font-size:9px;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:1px 5px;margin-right:6px;font-weight:700;">REQUEST</span>' : '';
     div.innerHTML = `
       <div class="mail-from">${reqTag}${currentFolder === 'sent' ? 'To: ' + m.to : m.from}<span class="mail-time">${m.time}</span></div>
       <div class="mail-subject">${m.subject}</div>
@@ -872,14 +1873,19 @@ function renderMailList(){
   });
 
   if(items.length === 0){
-    list.innerHTML = '<div style="padding:24px;color:#5d6473;font-size:12px;font-family:var(--mono);">No messages in this folder</div>';
+    list.innerHTML = '<div style="padding:32px 24px;color:var(--ink-deep);font-size:12px;font-family:var(--mono);text-align:center;">No messages in this folder</div>';
   }
 }
 
 function openMail(idx){
   selectedMailIndex = idx;
-  const m = mailbox[currentFolder][idx];
-  if(currentFolder === 'inbox') m.unread = false;
+  const userKey = getUserMailKey(currentUser);
+  const m = mailboxes[userKey][currentFolder][idx];
+  
+  if(currentFolder === 'inbox' && m.unread) {
+    m.unread = false;
+    saveState();
+  }
   renderMailList();
 
   const reading = document.getElementById('mailReading');
@@ -889,12 +1895,12 @@ function openMail(idx){
     let actionHtml = '';
     if(!req || req.status === 'pending'){
       actionHtml = `
-        <button onclick="approveJoinRequest(${m.requestId})" style="border-color:var(--accent);color:var(--accent);">Approve</button>
-        <button onclick="denyJoinRequest(${m.requestId})" style="border-color:var(--warn);color:var(--warn);">Deny</button>`;
+        <button onclick="approveJoinRequest(${m.requestId})" style="border-color:var(--accent);color:var(--accent);background:var(--accent-dim);">Approve</button>
+        <button onclick="denyJoinRequest(${m.requestId})" style="border-color:var(--warn);color:var(--warn);background:var(--warn-dim);">Deny</button>`;
     } else if(req.status === 'approved'){
-      actionHtml = `<span style="font-size:12px;color:var(--accent);font-family:var(--mono);">✓ Approved — temp password: ${req.tempPassword}</span>`;
+      actionHtml = `<span style="font-size:12px;color:var(--accent);font-family:var(--mono);font-weight:700;">✓ Approved — temp password: ${req.tempPassword}</span>`;
     } else {
-      actionHtml = `<span style="font-size:12px;color:var(--warn);font-family:var(--mono);">✕ Denied</span>`;
+      actionHtml = `<span style="font-size:12px;color:var(--warn);font-family:var(--mono);font-weight:700;">✕ Denied</span>`;
     }
 
     reading.innerHTML = `
@@ -928,31 +1934,76 @@ function openCompose(prefillTo){
   document.getElementById('composeSubject').value = '';
   document.getElementById('composeBody').value = '';
 }
+
 function closeCompose(){
   document.getElementById('composeModal').style.display = 'none';
 }
+
 function sendMail(){
   const to = document.getElementById('composeTo').value.trim();
   const subject = document.getElementById('composeSubject').value.trim();
   const body = document.getElementById('composeBody').value.trim();
+  
   if(!to || !subject){
-    alert('Please enter a recipient and a subject.');
+    showToast('Please enter a recipient and a subject.', 'warning');
     return;
   }
-  mailbox.sent.unshift({
-    to, subject, body,
-    snippet: body.slice(0, 40),
-    time: 'Now'
+
+  let recipientKey = null;
+  let recipientName = '';
+
+  if (to.toLowerCase() === 'boss') {
+    recipientKey = `Boss@${currentUser.org}`;
+    recipientName = 'Boss';
+  } else {
+    // Check if recipient is a member in current user's organization
+    const recipient = WORKSPACE_MEMBERS.find(m => m.name.toLowerCase() === to.toLowerCase() && m.org === currentUser.org);
+    if (recipient) {
+      recipientKey = `${recipient.name}@${currentUser.org}`;
+      recipientName = recipient.name;
+    }
+  }
+
+  if (!recipientKey) {
+    showToast('Recipient not found in your organization workspace.', 'error');
+    return;
+  }
+
+  const senderKey = getUserMailKey(currentUser);
+  const senderName = currentUser.isOrgAdmin ? 'Boss' : currentUser.name;
+
+  const mailData = {
+    subject,
+    body,
+    snippet: body.slice(0, 45) + (body.length > 45 ? '...' : ''),
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+
+  // Add to Sender Sent mailbox
+  if (!mailboxes[senderKey]) mailboxes[senderKey] = { inbox: [], sent: [] };
+  mailboxes[senderKey].sent.unshift({
+    ...mailData,
+    to: recipientName,
+    unread: false
   });
+
+  // Add to Recipient Inbox mailbox
+  if (!mailboxes[recipientKey]) mailboxes[recipientKey] = { inbox: [], sent: [] };
+  mailboxes[recipientKey].inbox.unshift({
+    ...mailData,
+    from: senderName,
+    unread: true
+  });
+
+  saveState();
   closeCompose();
+  
   if(currentFolder === 'sent') renderMailList();
-  alert(`Sent to ${to}. (Recorded as an internal workspace message)`);
+  showToast(`Email sent to ${recipientName}`);
 }
 
 /* =====================================================================
-   MONITOR — camera / screen share / recording
-   Each panel is started only by the person using it. No remote or
-   forced activation of another member's camera/screen is implemented.
+   MONITOR — CAMERA & SCREEN SHARE
 ===================================================================== */
 const recorders = {};
 const recordedChunks = {};
@@ -962,10 +2013,10 @@ let panelCount = 0;
 function addPanel(){
   panelCount++;
   const id = panelCount;
-  const owner = currentUser ? currentUser.name : '—';
+  const owner = currentUser ? (currentUser.isOrgAdmin ? 'Boss' : currentUser.name) : '—';
 
   const panelHtml = `
-    <div class="panel" id="panel${id}">
+    <div class="panel fade-in" id="panel${id}">
       <div class="panel-header">
         <span class="panel-title">MONITOR-${id}</span>
         <span class="panel-owner">Operator: ${owner}</span>
@@ -1020,9 +2071,12 @@ async function startCamera(id){
     const badge = document.getElementById(`badge${id}`);
     badge.innerText = '📷 CAM';
     badge.style.display = 'block';
-    badge.style.color = '#3ddc97'; badge.style.background = 'rgba(61,220,151,0.12)';
+    badge.style.color = '#3ddc97'; 
+    badge.style.background = 'rgba(61,220,151,0.12)';
     stream.getVideoTracks()[0].onended = () => resetPanel(id);
-  }catch(err){ alert('Could not start the camera.\n' + err); }
+  }catch(err){ 
+    showToast('Could not access camera: ' + err.message, 'error'); 
+  }
 }
 
 async function startScreenShare(id){
@@ -1035,9 +2089,12 @@ async function startScreenShare(id){
     const badge = document.getElementById(`badge${id}`);
     badge.innerText = '🖥️ SHARE';
     badge.style.display = 'block';
-    badge.style.color = '#e8b34c'; badge.style.background = 'rgba(232,179,76,0.12)';
+    badge.style.color = '#f3c468'; 
+    badge.style.background = 'rgba(243,196,104,0.12)';
     stream.getVideoTracks()[0].onended = () => resetPanel(id);
-  }catch(err){ alert('Screen share was cancelled.\n' + err); }
+  }catch(err){ 
+    showToast('Screen share was cancelled: ' + err.message, 'warning'); 
+  }
 }
 
 function resetPanel(id){
@@ -1051,7 +2108,7 @@ function resetPanel(id){
 
 function startRecording(id){
   const stream = streams[id];
-  if(!stream) return alert('Start a camera or screen share first.');
+  if(!stream) return showToast('Please activate camera or screen share first.', 'warning');
   recordedChunks[id] = [];
   const recorder = new MediaRecorder(stream, { mimeType:'video/webm' });
   recorders[id] = recorder;
@@ -1062,12 +2119,16 @@ function startRecording(id){
     a.href = url;
     const now = new Date();
     a.download = `REC_${id}_${now.getHours()}${now.getMinutes()}.webm`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    document.body.appendChild(a); 
+    a.click(); 
+    document.body.removeChild(a);
+    showToast('Recording downloaded.');
   };
   recorder.start();
   document.getElementById(`recBtn${id}`).classList.add('recording');
   document.getElementById(`recBtn${id}`).disabled = true;
   document.getElementById(`stopBtn${id}`).disabled = false;
+  showToast('Recording started.');
 }
 
 function stopRecording(id){
@@ -1078,6 +2139,15 @@ function stopRecording(id){
     document.getElementById(`stopBtn${id}`).disabled = true;
   }
 }
+
+/* =====================================================================
+   INITIALIZATION
+===================================================================== */
+window.addEventListener('DOMContentLoaded', () => {
+  if (currentUser) {
+    enterApp();
+  }
+});
 </script>
 </body>
 </html>
