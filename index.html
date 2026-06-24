@@ -1,0 +1,912 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUBLINE — Team Workspace</title>
+<style>
+  :root{
+    --bg-0:#0b0d12;
+    --bg-1:#11141b;
+    --bg-2:#171b24;
+    --line:#262b36;
+    --ink:#e7e9ee;
+    --ink-dim:#8b93a3;
+    --accent:#3ddc97;
+    --accent-dim:#1f5e44;
+    --warn:#ff6b6b;
+    --gold:#e8b34c;
+    --mono:'IBM Plex Mono','Courier New',monospace;
+    --sans:'Inter','Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;height:100vh;overflow:hidden;
+    background:var(--bg-0);
+    color:var(--ink);
+    font-family:var(--sans);
+  }
+
+  /* ===================== LOGIN ===================== */
+  #loginScreen{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(61,220,151,0.06), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(232,179,76,0.05), transparent 45%),
+      var(--bg-0);
+    z-index:100;
+  }
+  .login-card{
+    width:400px;
+    background:var(--bg-1);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:36px 32px 28px;
+    box-shadow:0 30px 60px rgba(0,0,0,0.55);
+  }
+  .login-brand{
+    display:flex;align-items:center;gap:10px;margin-bottom:6px;
+  }
+  .login-brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);}
+  .login-brand span{font-family:var(--mono);font-weight:700;letter-spacing:2px;font-size:14px;color:var(--ink);}
+  .login-sub{font-size:12px;color:var(--ink-dim);margin-bottom:22px;letter-spacing:0.5px;}
+
+  .login-mode-toggle{
+    display:flex;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:8px;padding:3px;margin-bottom:22px;
+  }
+  .login-mode-toggle button{
+    flex:1;background:transparent;border:none;color:var(--ink-dim);
+    padding:8px 0;font-size:12px;font-weight:700;letter-spacing:0.5px;
+    border-radius:6px;cursor:pointer;font-family:var(--sans);
+  }
+  .login-mode-toggle button.active{background:var(--accent);color:#06150e;}
+
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;font-size:11px;color:var(--ink-dim);
+    letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;
+    font-family:var(--mono);
+  }
+  .field input{
+    width:100%;padding:11px 12px;
+    background:var(--bg-2);border:1px solid var(--line);
+    border-radius:8px;color:var(--ink);font-size:14px;
+    font-family:var(--mono);outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(61,220,151,0.12);}
+
+  .login-btn{
+    width:100%;margin-top:8px;padding:12px;
+    background:var(--accent);color:#06150e;border:none;
+    border-radius:8px;font-weight:700;font-size:13px;
+    letter-spacing:1px;cursor:pointer;font-family:var(--mono);
+    transition:transform .12s, background .15s;
+  }
+  .login-btn:hover{background:#52e8ab;transform:translateY(-1px);}
+  .login-btn:active{transform:translateY(0);}
+  .login-error{
+    margin-top:12px;font-size:12px;color:var(--warn);
+    font-family:var(--mono);display:none;
+  }
+  .login-foot{
+    margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:11px;color:var(--ink-dim);line-height:1.6;
+  }
+
+  /* ===================== APP SHELL ===================== */
+  #app{display:none;height:100vh;flex-direction:column;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 20px;background:var(--bg-1);
+    border-bottom:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .brand-mini{display:flex;align-items:center;gap:8px;}
+  .brand-mini .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+  .brand-mini span{font-family:var(--mono);font-weight:700;letter-spacing:1.5px;font-size:13px;}
+  .org-pill{
+    font-family:var(--mono);font-size:11px;color:var(--ink-dim);
+    background:var(--bg-2);border:1px solid var(--line);
+    padding:4px 10px;border-radius:20px;
+  }
+  .tabs{display:flex;gap:4px;}
+  .tab-btn{
+    background:transparent;border:none;color:var(--ink-dim);
+    padding:8px 16px;border-radius:7px;font-size:13px;
+    cursor:pointer;font-family:var(--sans);font-weight:600;
+    transition:all .15s;
+  }
+  .tab-btn:hover{color:var(--ink);background:var(--bg-2);}
+  .tab-btn.active{color:#06150e;background:var(--accent);}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .user-chip{
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;color:var(--ink-dim);font-family:var(--mono);
+  }
+  .role-badge{
+    font-size:10px;padding:2px 8px;border-radius:10px;
+    border:1px solid var(--gold);color:var(--gold);
+    letter-spacing:1px;
+  }
+  .role-badge.member{border-color:var(--accent);color:var(--accent);}
+  .logout-btn{
+    background:transparent;border:1px solid var(--line);
+    color:var(--ink-dim);padding:6px 12px;border-radius:7px;
+    font-size:12px;cursor:pointer;font-family:var(--mono);
+  }
+  .logout-btn:hover{color:var(--warn);border-color:var(--warn);}
+
+  .view{flex-grow:1;overflow:auto;display:none;}
+  .view.active{display:flex;flex-direction:column;}
+
+  /* ===================== MAIL VIEW ===================== */
+  #mailView{flex-direction:row;height:100%;}
+  .mail-sidebar{
+    width:220px;background:var(--bg-1);border-right:1px solid var(--line);
+    padding:18px 12px;flex-shrink:0;display:flex;flex-direction:column;
+  }
+  .compose-btn{
+    background:var(--accent);color:#06150e;border:none;
+    padding:11px;border-radius:9px;font-weight:700;font-size:13px;
+    cursor:pointer;margin-bottom:18px;font-family:var(--sans);
+  }
+  .compose-btn:hover{background:#52e8ab;}
+  .mail-nav-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:9px 12px;border-radius:7px;color:var(--ink-dim);
+    font-size:13px;cursor:pointer;margin-bottom:2px;
+  }
+  .mail-nav-item:hover{background:var(--bg-2);color:var(--ink);}
+  .mail-nav-item.active{background:var(--bg-2);color:var(--accent);font-weight:600;}
+  .mail-nav-item .count{
+    font-family:var(--mono);font-size:11px;
+    background:var(--accent-dim);color:var(--accent);
+    padding:1px 7px;border-radius:9px;
+  }
+  .mail-list{
+    width:340px;border-right:1px solid var(--line);
+    overflow-y:auto;flex-shrink:0;background:var(--bg-0);
+  }
+  .mail-item{
+    padding:14px 18px;border-bottom:1px solid var(--line);
+    cursor:pointer;transition:background .1s;
+  }
+  .mail-item:hover{background:var(--bg-2);}
+  .mail-item.selected{background:var(--bg-2);border-left:3px solid var(--accent);}
+  .mail-item.unread .mail-from{font-weight:700;color:var(--ink);}
+  .mail-item.unread .mail-subject{font-weight:600;color:var(--ink);}
+  .mail-from{font-size:13px;color:var(--ink-dim);margin-bottom:4px;}
+  .mail-subject{font-size:13px;color:var(--ink-dim);margin-bottom:4px;}
+  .mail-snippet{font-size:12px;color:#5d6473;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mail-time{float:right;font-size:11px;color:#5d6473;font-family:var(--mono);}
+
+  .mail-reading{flex-grow:1;overflow-y:auto;padding:28px 36px;}
+  .mail-reading-empty{
+    flex-grow:1;display:flex;align-items:center;justify-content:center;
+    color:#3a4150;font-family:var(--mono);font-size:13px;letter-spacing:1px;
+  }
+  .mail-subject-lg{font-size:20px;font-weight:700;margin-bottom:18px;}
+  .mail-meta{
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px;
+  }
+  .mail-meta-from{font-size:13px;color:var(--ink-dim);}
+  .mail-meta-from b{color:var(--ink);}
+  .mail-body{font-size:14px;line-height:1.8;color:#cfd3dc;white-space:pre-wrap;}
+  .mail-actions{display:flex;gap:10px;margin-top:24px;}
+  .mail-actions button{
+    background:var(--bg-2);border:1px solid var(--line);color:var(--ink);
+    padding:9px 18px;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--sans);font-weight:600;
+  }
+  .mail-actions button:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* compose modal */
+  #composeModal{
+    position:fixed;inset:0;background:rgba(0,0,0,0.55);
+    display:none;align-items:flex-end;justify-content:flex-end;z-index:50;padding:24px;
+  }
+  .compose-box{
+    width:560px;background:var(--bg-1);border:1px solid var(--line);
+    border-radius:12px 12px 0 0;box-shadow:0 20px 50px rgba(0,0,0,0.6);
+    display:flex;flex-direction:column;max-height:80vh;
+  }
+  .compose-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 18px;background:var(--bg-2);border-radius:12px 12px 0 0;
+    font-size:13px;font-weight:700;
+  }
+  .compose-head button{background:none;border:none;color:var(--ink-dim);font-size:16px;cursor:pointer;}
+  .compose-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px;}
+  .compose-body input, .compose-body textarea{
+    width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
+    color:var(--ink);font-size:13px;padding:8px 0;outline:none;font-family:var(--sans);
+  }
+  .compose-body textarea{border-bottom:none;resize:none;height:200px;margin-top:6px;font-family:var(--sans);}
+  .compose-foot{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-top:1px solid var(--line);}
+  .send-btn{
+    background:var(--accent);color:#06150e;border:none;border-radius:18px;
+    padding:9px 22px;font-weight:700;font-size:13px;cursor:pointer;
+  }
+  .send-btn:hover{background:#52e8ab;}
+  .compose-note{font-size:10px;color:#5d6473;font-family:var(--mono);}
+
+  /* ===================== MEMBERS VIEW ===================== */
+  #membersView{padding:28px 36px;overflow-y:auto;}
+  .section-title{font-size:13px;letter-spacing:1.5px;color:var(--ink-dim);font-family:var(--mono);margin-bottom:16px;text-transform:uppercase;}
+  .members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+  .member-card{
+    background:var(--bg-1);border:1px solid var(--line);border-radius:10px;padding:16px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .member-top{display:flex;justify-content:space-between;align-items:center;}
+  .member-name{font-weight:700;font-size:14px;}
+  .status-dot{width:8px;height:8px;border-radius:50%;}
+  .status-dot.online{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+  .status-dot.away{background:#5d6473;}
+  .member-role{font-size:11px;color:var(--ink-dim);font-family:var(--mono);}
+  .member-note{font-size:11px;color:#5d6473;}
+
+  /* ===================== ADMIN VIEW ===================== */
+  #adminView{padding:28px 36px;overflow-y:auto;}
+  .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+  .admin-card{
+    background:var(--bg-1);border:1px solid var(--line);border-radius:12px;padding:22px;
+  }
+  .admin-card h3{margin:0 0 4px;font-size:14px;}
+  .admin-card .sub{font-size:12px;color:var(--ink-dim);margin-bottom:18px;}
+  .admin-card .field input, .admin-card .field select{
+    width:100%;padding:10px 12px;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:7px;color:var(--ink);font-size:13px;font-family:var(--mono);outline:none;
+  }
+  .admin-card .field{margin-bottom:12px;}
+  .admin-create-btn{
+    background:var(--gold);color:#1c1305;border:none;border-radius:8px;
+    padding:10px 18px;font-weight:700;font-size:12px;cursor:pointer;font-family:var(--sans);width:100%;
+  }
+  .admin-create-btn:hover{background:#f3c468;}
+  .code-table{width:100%;border-collapse:collapse;margin-top:6px;}
+  .code-table th{
+    text-align:left;font-size:10px;color:var(--ink-dim);text-transform:uppercase;
+    letter-spacing:0.5px;padding:6px 8px;border-bottom:1px solid var(--line);font-family:var(--mono);
+  }
+  .code-table td{
+    font-size:12px;padding:8px 8px;border-bottom:1px solid var(--line);font-family:var(--mono);
+  }
+  .code-pill{
+    background:var(--bg-2);border:1px solid var(--line);border-radius:5px;
+    padding:2px 8px;color:var(--accent);
+  }
+  .admin-note{
+    font-size:11px;color:var(--ink-dim);line-height:1.6;margin-top:14px;
+    border-top:1px solid var(--line);padding-top:12px;
+  }
+
+  /* ===================== MONITOR (CAMERA/SHARE) VIEW ===================== */
+  #monitorView{padding:18px;overflow-y:auto;}
+  .monitor-toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:14px;padding:0 6px;
+  }
+  .monitor-hint{font-size:12px;color:var(--ink-dim);max-width:560px;line-height:1.6;}
+  .monitor-hint b{color:var(--accent);}
+  #gridContainer{
+    flex-grow:1;display:grid;gap:16px;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  }
+  .panel{
+    background:var(--bg-1);border:1px solid var(--line);border-radius:12px;
+    display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,0.35);
+  }
+  .panel-header{
+    background:var(--bg-2);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--line);
+  }
+  .panel-title{font-size:12px;font-weight:700;color:var(--ink-dim);font-family:var(--mono);}
+  .panel-owner{font-size:11px;color:#5d6473;}
+  .btn-close-x{background:none;border:none;color:var(--warn);cursor:pointer;font-size:14px;}
+  .video-container{padding:10px;background:rgba(0,0,0,0.25);}
+  .video-wrapper{
+    position:relative;width:100%;aspect-ratio:16/9;background:#04050a;
+    border-radius:7px;overflow:hidden;border:1px solid #1a1d26;
+  }
+  video{width:100%;height:100%;object-fit:cover;}
+  .status-text{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    color:rgba(255,255,255,0.18);font-size:13px;font-weight:700;letter-spacing:3px;font-family:var(--mono);
+  }
+  .video-badge{
+    position:absolute;top:8px;left:8px;padding:3px 8px;font-size:10px;font-family:var(--mono);
+    font-weight:700;border-radius:4px;display:none;
+  }
+  .controls-wrapper{display:flex;flex-direction:column;gap:8px;padding:0 12px 12px;}
+  .controls-video{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  button.ctrl{
+    background:var(--bg-2);color:var(--ink);border:1px solid var(--line);
+    padding:7px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-weight:600;font-family:var(--sans);
+  }
+  button.ctrl:hover{border-color:var(--accent);color:var(--accent);}
+  button.ctrl:disabled{opacity:0.35;cursor:not-allowed;}
+  .btn-record{background:#3a1f23;border-color:#5c2a30;color:#ff9b9b;}
+  .btn-record.recording{background:var(--gold);color:#1c1305;animation:blink 1s infinite alternate;}
+  @keyframes blink{from{opacity:1;}to{opacity:0.55;}}
+  .add-panel-btn{
+    background:transparent;border:1px dashed var(--line);color:var(--ink-dim);
+    border-radius:12px;display:flex;align-items:center;justify-content:center;
+    min-height:200px;cursor:pointer;font-size:13px;font-family:var(--mono);
+  }
+  .add-panel-btn:hover{border-color:var(--accent);color:var(--accent);}
+</style>
+</head>
+<body>
+
+<!-- ============== LOGIN SCREEN ============== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand"><span class="dot"></span><span>HUBLINE</span></div>
+    <div class="login-sub">Team Workspace Login</div>
+
+    <div class="login-mode-toggle">
+      <button id="modeMemberBtn" class="active" onclick="setLoginMode('member')">Member</button>
+      <button id="modeAdminBtn" onclick="setLoginMode('admin')">Admin</button>
+    </div>
+
+    <!-- Member fields -->
+    <div id="memberFields">
+      <div class="field">
+        <label>Organization Code</label>
+        <input id="orgCode" type="text" placeholder="e.g. ACME-CORP" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Group Code</label>
+        <input id="groupCode" type="text" placeholder="e.g. SALES-TEAM" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Display Name</label>
+        <input id="userName" type="text" placeholder="Your name" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="userPass" type="password" placeholder="••••••••" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Admin fields -->
+    <div id="adminFields" style="display:none;">
+      <div class="field">
+        <label>Organization Code</label>
+        <input id="adminOrgCode" type="text" placeholder="e.g. ACME-CORP" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Admin Password</label>
+        <input id="adminPass" type="password" placeholder="••••••••" autocomplete="off">
+      </div>
+    </div>
+
+    <button class="login-btn" onclick="attemptLogin()">Sign in →</button>
+    <div class="login-error" id="loginError">Incorrect code or password.</div>
+
+    <div class="login-foot">
+      Signing in adds you to the workspace under your own name.<br>
+      No member can access another member's mail, camera, or screen without that person's own action.
+    </div>
+  </div>
+</div>
+
+<!-- ============== APP SHELL ============== -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="brand-mini"><span class="dot"></span><span>HUBLINE</span></div>
+      <div class="org-pill" id="orgPillText">ACME-CORP / SALES-TEAM</div>
+      <div class="tabs" id="tabsContainer">
+        <button class="tab-btn active" data-view="mailView" onclick="switchView('mailView', this)">Mail</button>
+        <button class="tab-btn" data-view="monitorView" onclick="switchView('monitorView', this)">Screen/Camera</button>
+        <button class="tab-btn" data-view="membersView" onclick="switchView('membersView', this)">Members</button>
+        <button class="tab-btn" id="adminTabBtn" data-view="adminView" onclick="switchView('adminView', this)" style="display:none;">Admin</button>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <span id="currentUserName">—</span>
+        <span class="role-badge member" id="currentUserRole">MEMBER</span>
+      </div>
+      <button class="logout-btn" onclick="logout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- ========== MAIL VIEW ========== -->
+  <div id="mailView" class="view active">
+    <div class="mail-sidebar">
+      <button class="compose-btn" onclick="openCompose()">+ Compose</button>
+      <div class="mail-nav-item active" data-folder="inbox" onclick="selectFolder('inbox', this)">
+        Inbox <span class="count" id="inboxCount">0</span>
+      </div>
+      <div class="mail-nav-item" data-folder="sent" onclick="selectFolder('sent', this)">Sent</div>
+    </div>
+    <div class="mail-list" id="mailList"></div>
+    <div class="mail-reading" id="mailReading">
+      <div class="mail-reading-empty">Select an email to read</div>
+    </div>
+  </div>
+
+  <!-- ========== MEMBERS VIEW ========== -->
+  <div id="membersView" class="view">
+    <div class="section-title">Workspace Members</div>
+    <div class="members-grid" id="membersGrid"></div>
+  </div>
+
+  <!-- ========== ADMIN VIEW (visible to ADMIN role only) ========== -->
+  <div id="adminView" class="view">
+    <div class="section-title">Workspace Administration</div>
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h3>Create Organization Code</h3>
+        <div class="sub">Generates a new top-level organization code. Members join with this code plus a group code.</div>
+        <div class="field"><label>Organization Name</label><input id="newOrgName" type="text" placeholder="e.g. NORTHWIND-LOGISTICS"></div>
+        <button class="admin-create-btn" onclick="createOrgCode()">Create Organization Code</button>
+      </div>
+      <div class="admin-card">
+        <h3>Create Group Code</h3>
+        <div class="sub">Generates a group code inside an existing organization.</div>
+        <div class="field">
+          <label>Organization</label>
+          <select id="groupOrgSelect"></select>
+        </div>
+        <div class="field"><label>Group Name</label><input id="newGroupName" type="text" placeholder="e.g. WAREHOUSE-OPS"></div>
+        <button class="admin-create-btn" onclick="createGroupCode()">Create Group Code</button>
+      </div>
+    </div>
+
+    <div class="admin-card" style="margin-top:24px;">
+      <h3>Active Codes</h3>
+      <div class="sub">Visible to every admin. Members only ever see the org/group code they were given.</div>
+      <table class="code-table">
+        <thead><tr><th>Type</th><th>Code</th><th>Belongs To</th></tr></thead>
+        <tbody id="codeTableBody"></tbody>
+      </table>
+      <div class="admin-note">
+        Admin sign-in uses the organization code plus the admin password — it does not grant access to
+        any individual member's mail, camera, or screen. Members must take their own actions to share those.
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MONITOR VIEW (camera / screen share / recording) ========== -->
+  <div id="monitorView" class="view">
+    <div class="monitor-toolbar">
+      <div class="monitor-hint">
+        Each panel shows only the camera/screen of <b>the person who opened that panel</b>. No one else can start
+        it remotely or view it without that person's own action.
+      </div>
+    </div>
+    <div id="gridContainer"></div>
+  </div>
+</div>
+
+<!-- ============== COMPOSE MODAL ============== -->
+<div id="composeModal">
+  <div class="compose-box">
+    <div class="compose-head">
+      <span>New Message</span>
+      <button onclick="closeCompose()">✕</button>
+    </div>
+    <div class="compose-body">
+      <input id="composeTo" type="text" placeholder="To (member name)">
+      <input id="composeSubject" type="text" placeholder="Subject">
+      <textarea id="composeBody" placeholder="Write your message..."></textarea>
+    </div>
+    <div class="compose-foot">
+      <span class="compose-note">Sent as an internal workspace message</span>
+      <button class="send-btn" onclick="sendMail()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   AUTH / WORKSPACE STATE
+   Demo implementation — everything lives in memory and resets on reload.
+   Replace this with a real auth backend for production use.
+===================================================================== */
+
+const ADMIN_PASSWORD = "6090"; // Admin sign-in: organization code + this password only.
+
+// Demo workspace data
+let organizations = [
+  { code: "ACME-CORP", name: "Acme Corp" }
+];
+let groups = [
+  { code: "SALES-TEAM", orgCode: "ACME-CORP", name: "Sales Team" }
+];
+const WORKSPACE_MEMBERS = [
+  { name: "Alex Carter",  pass: "pass123", role: "ADMIN",  org: "ACME-CORP", group: "SALES-TEAM" },
+  { name: "Jordan Lee",   pass: "pass123", role: "MEMBER", org: "ACME-CORP", group: "SALES-TEAM" },
+  { name: "Sam Rivera",   pass: "pass123", role: "MEMBER", org: "ACME-CORP", group: "SALES-TEAM" },
+];
+
+let currentUser = null;
+let loginMode = 'member';
+
+function setLoginMode(mode){
+  loginMode = mode;
+  document.getElementById('modeMemberBtn').classList.toggle('active', mode === 'member');
+  document.getElementById('modeAdminBtn').classList.toggle('active', mode === 'admin');
+  document.getElementById('memberFields').style.display = mode === 'member' ? 'block' : 'none';
+  document.getElementById('adminFields').style.display = mode === 'admin' ? 'block' : 'none';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+function attemptLogin(){
+  const errEl = document.getElementById('loginError');
+
+  if(loginMode === 'admin'){
+    const org = document.getElementById('adminOrgCode').value.trim().toUpperCase();
+    const pass = document.getElementById('adminPass').value;
+    const orgExists = organizations.some(o => o.code === org);
+
+    if(!orgExists || pass !== ADMIN_PASSWORD){
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    currentUser = { name: "Admin", role: "ADMIN", org, group: null, isOrgAdmin: true };
+    enterApp();
+    return;
+  }
+
+  const org   = document.getElementById('orgCode').value.trim().toUpperCase();
+  const group = document.getElementById('groupCode').value.trim().toUpperCase();
+  const name  = document.getElementById('userName').value.trim();
+  const pass  = document.getElementById('userPass').value;
+
+  const orgOk = organizations.some(o => o.code === org);
+  const groupOk = groups.some(g => g.code === group && g.orgCode === org);
+  const member = WORKSPACE_MEMBERS.find(m => m.name === name && m.pass === pass && m.org === org && m.group === group);
+
+  if(!orgOk || !groupOk || !member){
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  currentUser = member;
+  enterApp();
+}
+
+function enterApp(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('currentUserName').innerText = currentUser.name;
+  document.getElementById('currentUserRole').innerText = currentUser.role;
+  document.getElementById('currentUserRole').className = 'role-badge ' + (currentUser.role === 'ADMIN' ? '' : 'member');
+  document.getElementById('orgPillText').innerText = currentUser.group ? `${currentUser.org} / ${currentUser.group}` : currentUser.org;
+
+  document.getElementById('adminTabBtn').style.display = currentUser.role === 'ADMIN' ? 'inline-block' : 'none';
+
+  renderMembers();
+  renderMailList();
+  renderAdminPanel();
+  if(document.getElementById('gridContainer').children.length === 0){
+    addPanel();
+  }
+}
+
+function logout(){
+  currentUser = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('userPass').value = '';
+  document.getElementById('adminPass').value = '';
+}
+
+function switchView(viewId, btn){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+/* =====================================================================
+   MEMBERS
+===================================================================== */
+function renderMembers(){
+  const grid = document.getElementById('membersGrid');
+  grid.innerHTML = '';
+  WORKSPACE_MEMBERS.forEach((m, idx) => {
+    const online = idx !== 2; // demo: arbitrary online status
+    const div = document.createElement('div');
+    div.className = 'member-card';
+    div.innerHTML = `
+      <div class="member-top">
+        <span class="member-name">${m.name}</span>
+        <span class="status-dot ${online ? 'online' : 'away'}"></span>
+      </div>
+      <span class="member-role">${m.role}</span>
+      <span class="member-note">${online ? 'Online' : 'Away'} · Camera/screen can only be started by this person</span>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+/* =====================================================================
+   ADMIN PANEL — create organization / group codes
+   Plain, visible admin feature: any admin can see and create these codes.
+   This does NOT grant access to a member's own mail, camera, or screen.
+===================================================================== */
+function renderAdminPanel(){
+  const orgSelect = document.getElementById('groupOrgSelect');
+  orgSelect.innerHTML = organizations.map(o => `<option value="${o.code}">${o.code}</option>`).join('');
+
+  const tbody = document.getElementById('codeTableBody');
+  let rows = '';
+  organizations.forEach(o => {
+    rows += `<tr><td>Organization</td><td><span class="code-pill">${o.code}</span></td><td>${o.name}</td></tr>`;
+  });
+  groups.forEach(g => {
+    rows += `<tr><td>Group</td><td><span class="code-pill">${g.code}</span></td><td>${g.name} (${g.orgCode})</td></tr>`;
+  });
+  tbody.innerHTML = rows;
+}
+
+function slugify(str){
+  return str.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function createOrgCode(){
+  const name = document.getElementById('newOrgName').value.trim();
+  if(!name){ alert('Enter an organization name.'); return; }
+  const code = slugify(name);
+  if(organizations.some(o => o.code === code)){
+    alert('That organization code already exists.');
+    return;
+  }
+  organizations.push({ code, name });
+  document.getElementById('newOrgName').value = '';
+  renderAdminPanel();
+}
+
+function createGroupCode(){
+  const orgCode = document.getElementById('groupOrgSelect').value;
+  const name = document.getElementById('newGroupName').value.trim();
+  if(!name){ alert('Enter a group name.'); return; }
+  const code = slugify(name);
+  if(groups.some(g => g.code === code && g.orgCode === orgCode)){
+    alert('That group code already exists in this organization.');
+    return;
+  }
+  groups.push({ code, orgCode, name });
+  document.getElementById('newGroupName').value = '';
+  renderAdminPanel();
+}
+
+/* =====================================================================
+   MAIL — demo internal messaging UI
+   Sending real external email (e.g. via Gmail) would require each
+   member's own OAuth login and a separate email API integration.
+===================================================================== */
+let mailbox = {
+  inbox: [
+    { from:"Alex Carter", subject:"Next week's standup", snippet:"Moved to Tuesday at 2pm.", body:"Hi team,\n\nNext week's standup has moved to Tuesday at 2pm.\nAgenda to follow shortly.\n\nAlex", time:"09:12", unread:true },
+    { from:"Sam Rivera", subject:"Could you review the proposal?", snippet:"Draft is ready for your feedback", body:"Hi,\n\nThe draft proposal we discussed is ready.\nCould you take a look when you have a moment?\n\nSam", time:"Yesterday", unread:false },
+  ],
+  sent: []
+};
+let currentFolder = 'inbox';
+let selectedMailIndex = null;
+
+function selectFolder(folder, el){
+  currentFolder = folder;
+  selectedMailIndex = null;
+  document.querySelectorAll('.mail-nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  renderMailList();
+  document.getElementById('mailReading').innerHTML = '<div class="mail-reading-empty">Select an email to read</div>';
+}
+
+function renderMailList(){
+  const list = document.getElementById('mailList');
+  list.innerHTML = '';
+  const items = mailbox[currentFolder];
+  document.getElementById('inboxCount').innerText = mailbox.inbox.filter(m => m.unread).length;
+
+  items.forEach((m, idx) => {
+    const div = document.createElement('div');
+    div.className = 'mail-item' + (m.unread ? ' unread' : '') + (selectedMailIndex === idx ? ' selected' : '');
+    div.onclick = () => openMail(idx);
+    div.innerHTML = `
+      <div class="mail-from">${currentFolder === 'sent' ? 'To: ' + m.to : m.from}<span class="mail-time">${m.time}</span></div>
+      <div class="mail-subject">${m.subject}</div>
+      <div class="mail-snippet">${m.snippet}</div>
+    `;
+    list.appendChild(div);
+  });
+
+  if(items.length === 0){
+    list.innerHTML = '<div style="padding:24px;color:#5d6473;font-size:12px;font-family:var(--mono);">No messages in this folder</div>';
+  }
+}
+
+function openMail(idx){
+  selectedMailIndex = idx;
+  const m = mailbox[currentFolder][idx];
+  if(currentFolder === 'inbox') m.unread = false;
+  renderMailList();
+
+  const reading = document.getElementById('mailReading');
+  reading.innerHTML = `
+    <div class="mail-subject-lg">${m.subject}</div>
+    <div class="mail-meta">
+      <div class="mail-meta-from">${currentFolder === 'sent' ? 'To' : 'From'}: <b>${currentFolder === 'sent' ? m.to : m.from}</b></div>
+      <div class="mail-meta-from">${m.time}</div>
+    </div>
+    <div class="mail-body">${m.body}</div>
+    <div class="mail-actions">
+      <button onclick="openCompose('${(currentFolder === 'sent' ? m.to : m.from)}')">Reply</button>
+    </div>
+  `;
+}
+
+function openCompose(prefillTo){
+  document.getElementById('composeModal').style.display = 'flex';
+  document.getElementById('composeTo').value = prefillTo || '';
+  document.getElementById('composeSubject').value = '';
+  document.getElementById('composeBody').value = '';
+}
+function closeCompose(){
+  document.getElementById('composeModal').style.display = 'none';
+}
+function sendMail(){
+  const to = document.getElementById('composeTo').value.trim();
+  const subject = document.getElementById('composeSubject').value.trim();
+  const body = document.getElementById('composeBody').value.trim();
+  if(!to || !subject){
+    alert('Please enter a recipient and a subject.');
+    return;
+  }
+  mailbox.sent.unshift({
+    to, subject, body,
+    snippet: body.slice(0, 40),
+    time: 'Now'
+  });
+  closeCompose();
+  if(currentFolder === 'sent') renderMailList();
+  alert(`Sent to ${to}. (Recorded as an internal workspace message)`);
+}
+
+/* =====================================================================
+   MONITOR — camera / screen share / recording
+   Each panel is started only by the person using it. No remote or
+   forced activation of another member's camera/screen is implemented.
+===================================================================== */
+const recorders = {};
+const recordedChunks = {};
+const streams = {};
+let panelCount = 0;
+
+function addPanel(){
+  panelCount++;
+  const id = panelCount;
+  const owner = currentUser ? currentUser.name : '—';
+
+  const panelHtml = `
+    <div class="panel" id="panel${id}">
+      <div class="panel-header">
+        <span class="panel-title">MONITOR-${id}</span>
+        <span class="panel-owner">Operator: ${owner}</span>
+        <button class="btn-close-x" onclick="removePanel(${id})">✕</button>
+      </div>
+      <div class="video-container">
+        <div class="video-wrapper">
+          <span class="status-text" id="status${id}">STANDBY</span>
+          <div class="video-badge" id="badge${id}"></div>
+          <video id="video${id}" autoplay muted></video>
+        </div>
+      </div>
+      <div class="controls-wrapper">
+        <div class="controls-video">
+          <button class="ctrl" onclick="startCamera(${id})">📷 Camera</button>
+          <button class="ctrl" onclick="startScreenShare(${id})">💻 Screen share</button>
+          <button id="recBtn${id}" class="ctrl btn-record" onclick="startRecording(${id})">🔴 Record</button>
+          <button id="stopBtn${id}" class="ctrl" onclick="stopRecording(${id})" disabled>⬛ Stop</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('gridContainer').insertAdjacentHTML('beforeend', panelHtml);
+  ensureAddButton();
+}
+
+function removePanel(id){
+  stopRecording(id);
+  if(streams[id]) streams[id].getTracks().forEach(t => t.stop());
+  const panel = document.getElementById(`panel${id}`);
+  if(panel) panel.remove();
+}
+
+function ensureAddButton(){
+  let btn = document.getElementById('addPanelBtn');
+  if(btn) btn.remove();
+  const div = document.createElement('div');
+  div.className = 'add-panel-btn';
+  div.id = 'addPanelBtn';
+  div.innerText = '+ Add your own camera/screen panel';
+  div.onclick = addPanel;
+  document.getElementById('gridContainer').appendChild(div);
+}
+
+async function startCamera(id){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
+    streams[id] = stream;
+    const video = document.getElementById(`video${id}`);
+    video.srcObject = stream;
+    document.getElementById(`status${id}`).style.display = 'none';
+    const badge = document.getElementById(`badge${id}`);
+    badge.innerText = '📷 CAM';
+    badge.style.display = 'block';
+    badge.style.color = '#3ddc97'; badge.style.background = 'rgba(61,220,151,0.12)';
+    stream.getVideoTracks()[0].onended = () => resetPanel(id);
+  }catch(err){ alert('Could not start the camera.\n' + err); }
+}
+
+async function startScreenShare(id){
+  try{
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:false });
+    streams[id] = stream;
+    const video = document.getElementById(`video${id}`);
+    video.srcObject = stream;
+    document.getElementById(`status${id}`).style.display = 'none';
+    const badge = document.getElementById(`badge${id}`);
+    badge.innerText = '🖥️ SHARE';
+    badge.style.display = 'block';
+    badge.style.color = '#e8b34c'; badge.style.background = 'rgba(232,179,76,0.12)';
+    stream.getVideoTracks()[0].onended = () => resetPanel(id);
+  }catch(err){ alert('Screen share was cancelled.\n' + err); }
+}
+
+function resetPanel(id){
+  const video = document.getElementById(`video${id}`);
+  if(video) video.srcObject = null;
+  const status = document.getElementById(`status${id}`);
+  if(status) status.style.display = 'block';
+  const badge = document.getElementById(`badge${id}`);
+  if(badge) badge.style.display = 'none';
+}
+
+function startRecording(id){
+  const stream = streams[id];
+  if(!stream) return alert('Start a camera or screen share first.');
+  recordedChunks[id] = [];
+  const recorder = new MediaRecorder(stream, { mimeType:'video/webm' });
+  recorders[id] = recorder;
+  recorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks[id].push(e.data); };
+  recorder.onstop = () => {
+    const url = URL.createObjectURL(new Blob(recordedChunks[id], { type:'video/webm' }));
+    const a = document.createElement('a');
+    a.href = url;
+    const now = new Date();
+    a.download = `REC_${id}_${now.getHours()}${now.getMinutes()}.webm`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+  recorder.start();
+  document.getElementById(`recBtn${id}`).classList.add('recording');
+  document.getElementById(`recBtn${id}`).disabled = true;
+  document.getElementById(`stopBtn${id}`).disabled = false;
+}
+
+function stopRecording(id){
+  if(recorders[id] && recorders[id].state === 'recording'){
+    recorders[id].stop();
+    document.getElementById(`recBtn${id}`).classList.remove('recording');
+    document.getElementById(`recBtn${id}`).disabled = false;
+    document.getElementById(`stopBtn${id}`).disabled = true;
+  }
+}
+</script>
+</body>
+</html>
