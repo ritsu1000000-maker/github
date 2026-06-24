@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -352,7 +353,7 @@
 
     <div class="login-mode-toggle">
       <button id="modeMemberBtn" class="active" onclick="setLoginMode('member')">Member</button>
-      <button id="modeAdminBtn" onclick="setLoginMode('admin')">Admin</button>
+      <button id="modeAdminBtn" onclick="setLoginMode('admin')">Boss</button>
     </div>
 
     <!-- Member fields -->
@@ -375,14 +376,14 @@
       </div>
     </div>
 
-    <!-- Admin fields -->
+    <!-- Boss fields -->
     <div id="adminFields" style="display:none;">
       <div class="field">
         <label>Organization Code</label>
         <input id="adminOrgCode" type="text" placeholder="e.g. ACME-CORP" autocomplete="off">
       </div>
       <div class="field">
-        <label>Admin Password</label>
+        <label>Boss Password</label>
         <input id="adminPass" type="password" placeholder="••••••••" autocomplete="off">
       </div>
     </div>
@@ -390,9 +391,47 @@
     <button class="login-btn" onclick="attemptLogin()">Sign in →</button>
     <div class="login-error" id="loginError">Incorrect code or password.</div>
 
-    <div class="login-foot">
+    <div class="login-foot" id="memberLoginFoot">
       Signing in adds you to the workspace under your own name.<br>
       No member can access another member's mail, camera, or screen without that person's own action.
+      <div style="margin-top:10px;">
+        <a href="#" onclick="openJoinRequest();return false;" style="color:var(--accent);text-decoration:none;font-weight:600;">Request to join a workspace →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== JOIN REQUEST MODAL ============== -->
+<div id="joinRequestModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:110;">
+  <div class="login-card" style="width:380px;">
+    <div class="login-brand"><span class="dot"></span><span>HUBLINE</span></div>
+    <div class="login-sub">Request to Join a Workspace</div>
+
+    <div class="field">
+      <label>Your Name</label>
+      <input id="reqName" type="text" placeholder="Full name" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Organization Code</label>
+      <input id="reqOrgCode" type="text" placeholder="e.g. ACME-CORP" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Group Code</label>
+      <input id="reqGroupCode" type="text" placeholder="e.g. SALES-TEAM" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Note to Boss (optional)</label>
+      <input id="reqNote" type="text" placeholder="e.g. New hire, starting Monday">
+    </div>
+
+    <button class="login-btn" onclick="submitJoinRequest()">Send Request</button>
+    <div class="login-error" id="joinRequestError">Please fill in your name, organization code, and group code.</div>
+
+    <div class="login-foot">
+      Your request is sent to the workspace boss's inbox. You'll be able to sign in once a boss approves it.
+      <div style="margin-top:10px;">
+        <a href="#" onclick="closeJoinRequest();return false;" style="color:var(--ink-dim);text-decoration:none;">← Back to sign in</a>
+      </div>
     </div>
   </div>
 </div>
@@ -407,7 +446,7 @@
         <button class="tab-btn active" data-view="mailView" onclick="switchView('mailView', this)">Mail</button>
         <button class="tab-btn" data-view="monitorView" onclick="switchView('monitorView', this)">Screen/Camera</button>
         <button class="tab-btn" data-view="membersView" onclick="switchView('membersView', this)">Members</button>
-        <button class="tab-btn" id="adminTabBtn" data-view="adminView" onclick="switchView('adminView', this)" style="display:none;">Admin</button>
+        <button class="tab-btn" id="adminTabBtn" data-view="adminView" onclick="switchView('adminView', this)" style="display:none;">Boss</button>
       </div>
     </div>
     <div class="topbar-right">
@@ -440,9 +479,9 @@
     <div class="members-grid" id="membersGrid"></div>
   </div>
 
-  <!-- ========== ADMIN VIEW (visible to ADMIN role only) ========== -->
+  <!-- ========== ADMIN VIEW (visible to BOSS role only) ========== -->
   <div id="adminView" class="view">
-    <div class="section-title">Workspace Administration</div>
+    <div class="section-title">Boss Controls</div>
     <div class="admin-grid">
       <div class="admin-card">
         <h3>Create Organization Code</h3>
@@ -464,13 +503,13 @@
 
     <div class="admin-card" style="margin-top:24px;">
       <h3>Active Codes</h3>
-      <div class="sub">Visible to every admin. Members only ever see the org/group code they were given.</div>
+      <div class="sub">Visible to every boss. Members only ever see the org/group code they were given.</div>
       <table class="code-table">
         <thead><tr><th>Type</th><th>Code</th><th>Belongs To</th></tr></thead>
         <tbody id="codeTableBody"></tbody>
       </table>
       <div class="admin-note">
-        Admin sign-in uses the organization code plus the admin password — it does not grant access to
+        Boss sign-in uses the organization code plus the boss password — it does not grant access to
         any individual member's mail, camera, or screen. Members must take their own actions to share those.
       </div>
     </div>
@@ -514,7 +553,7 @@
    Replace this with a real auth backend for production use.
 ===================================================================== */
 
-const ADMIN_PASSWORD = "6090"; // Admin sign-in: organization code + this password only.
+const BOSS_PASSWORD = "6090"; // Boss sign-in: organization code + this password only.
 
 // Demo workspace data
 let organizations = [
@@ -524,13 +563,131 @@ let groups = [
   { code: "SALES-TEAM", orgCode: "ACME-CORP", name: "Sales Team" }
 ];
 const WORKSPACE_MEMBERS = [
-  { name: "Alex Carter",  pass: "pass123", role: "ADMIN",  org: "ACME-CORP", group: "SALES-TEAM" },
+  { name: "Alex Carter",  pass: "pass123", role: "BOSS",  org: "ACME-CORP", group: "SALES-TEAM" },
   { name: "Jordan Lee",   pass: "pass123", role: "MEMBER", org: "ACME-CORP", group: "SALES-TEAM" },
   { name: "Sam Rivera",   pass: "pass123", role: "MEMBER", org: "ACME-CORP", group: "SALES-TEAM" },
 ];
 
 let currentUser = null;
 let loginMode = 'member';
+
+/* =====================================================================
+   MAIL — demo internal messaging UI
+   Sending real external email (e.g. via Gmail) would require each
+   member's own OAuth login and a separate email API integration.
+===================================================================== */
+let mailbox = {
+  inbox: [
+    { from:"Alex Carter", subject:"Next week's standup", snippet:"Moved to Tuesday at 2pm.", body:"Hi team,\n\nNext week's standup has moved to Tuesday at 2pm.\nAgenda to follow shortly.\n\nAlex", time:"09:12", unread:true },
+    { from:"Sam Rivera", subject:"Could you review the proposal?", snippet:"Draft is ready for your feedback", body:"Hi,\n\nThe draft proposal we discussed is ready.\nCould you take a look when you have a moment?\n\nSam", time:"Yesterday", unread:false },
+  ],
+  sent: []
+};
+let currentFolder = 'inbox';
+let selectedMailIndex = null;
+
+/* =====================================================================
+   JOIN REQUESTS
+   A request is just a special inbox item routed to every boss.
+   No code or password is bypassed — bosses still approve manually.
+===================================================================== */
+let joinRequests = [];
+let joinRequestCounter = 0;
+
+function openJoinRequest(){
+  document.getElementById('joinRequestModal').style.display = 'flex';
+  document.getElementById('joinRequestError').style.display = 'none';
+}
+function closeJoinRequest(){
+  document.getElementById('joinRequestModal').style.display = 'none';
+}
+
+function isNameTaken(name){
+  const lower = name.trim().toLowerCase();
+  const usedByMember = WORKSPACE_MEMBERS.some(m => m.name.toLowerCase() === lower);
+  const usedByRequest = joinRequests.some(r => r.name.toLowerCase() === lower);
+  return usedByMember || usedByRequest;
+}
+
+function submitJoinRequest(){
+  const name = document.getElementById('reqName').value.trim();
+  const org = document.getElementById('reqOrgCode').value.trim().toUpperCase();
+  const group = document.getElementById('reqGroupCode').value.trim().toUpperCase();
+  const note = document.getElementById('reqNote').value.trim();
+  const errEl = document.getElementById('joinRequestError');
+
+  if(!name || !org || !group){
+    errEl.innerText = 'Please fill in your name, organization code, and group code.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if(isNameTaken(name)){
+    errEl.innerText = 'That name has already been used in this workspace. Please use a different name.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  joinRequestCounter++;
+  const id = joinRequestCounter;
+  joinRequests.push({ id, name, org, group, note, status: 'pending', time: 'Now' });
+
+  // Drop it straight into the boss inbox as a join-request message
+  mailbox.inbox.unshift({
+    from: `Join Request — ${name}`,
+    subject: `Request to join ${org} / ${group}`,
+    snippet: note ? note : `${name} wants to join ${org} / ${group}`,
+    body: `${name} has requested to join this workspace.\n\nOrganization: ${org}\nGroup: ${group}\nNote: ${note || '(none)'}`,
+    time: 'Now',
+    unread: true,
+    isJoinRequest: true,
+    requestId: id
+  });
+
+  document.getElementById('reqName').value = '';
+  document.getElementById('reqOrgCode').value = '';
+  document.getElementById('reqGroupCode').value = '';
+  document.getElementById('reqNote').value = '';
+  closeJoinRequest();
+
+  if(typeof renderMailList === 'function') renderMailList();
+  alert('Your request has been sent. A boss will review it in their inbox.');
+}
+
+function approveJoinRequest(requestId){
+  const req = joinRequests.find(r => r.id === requestId);
+  if(!req || req.status !== 'pending') return;
+
+  const orgOk = organizations.some(o => o.code === req.org);
+  const groupOk = groups.some(g => g.code === req.group && g.orgCode === req.org);
+  if(!orgOk || !groupOk){
+    alert('That organization or group code no longer exists. Create it first in the Boss tab.');
+    return;
+  }
+
+  const nameClash = WORKSPACE_MEMBERS.some(m => m.name.toLowerCase() === req.name.toLowerCase());
+  if(nameClash){
+    alert(`"${req.name}" is already a member name in this workspace. Ask them to resubmit with a different name before approving.`);
+    return;
+  }
+
+  const tempPassword = Math.random().toString(36).slice(-8);
+  WORKSPACE_MEMBERS.push({ name: req.name, pass: tempPassword, role: 'MEMBER', org: req.org, group: req.group });
+  req.status = 'approved';
+  req.tempPassword = tempPassword;
+
+  renderMembers();
+  openMail(selectedMailIndex); // refresh the open message
+  alert(`Approved. Temporary password for ${req.name}: ${tempPassword}\n(Share this with them directly — it is not emailed automatically in this demo.)`);
+}
+
+function denyJoinRequest(requestId){
+  const req = joinRequests.find(r => r.id === requestId);
+  if(!req || req.status !== 'pending') return;
+  req.status = 'denied';
+  openMail(selectedMailIndex);
+}
 
 function setLoginMode(mode){
   loginMode = mode;
@@ -549,12 +706,12 @@ function attemptLogin(){
     const pass = document.getElementById('adminPass').value;
     const orgExists = organizations.some(o => o.code === org);
 
-    if(!orgExists || pass !== ADMIN_PASSWORD){
+    if(!orgExists || pass !== BOSS_PASSWORD){
       errEl.style.display = 'block';
       return;
     }
     errEl.style.display = 'none';
-    currentUser = { name: "Admin", role: "ADMIN", org, group: null, isOrgAdmin: true };
+    currentUser = { name: "Boss", role: "BOSS", org, group: null, isOrgAdmin: true };
     enterApp();
     return;
   }
@@ -582,10 +739,10 @@ function enterApp(){
   document.getElementById('app').style.display = 'flex';
   document.getElementById('currentUserName').innerText = currentUser.name;
   document.getElementById('currentUserRole').innerText = currentUser.role;
-  document.getElementById('currentUserRole').className = 'role-badge ' + (currentUser.role === 'ADMIN' ? '' : 'member');
+  document.getElementById('currentUserRole').className = 'role-badge ' + (currentUser.role === 'BOSS' ? '' : 'member');
   document.getElementById('orgPillText').innerText = currentUser.group ? `${currentUser.org} / ${currentUser.group}` : currentUser.org;
 
-  document.getElementById('adminTabBtn').style.display = currentUser.role === 'ADMIN' ? 'inline-block' : 'none';
+  document.getElementById('adminTabBtn').style.display = currentUser.role === 'BOSS' ? 'inline-block' : 'none';
 
   renderMembers();
   renderMailList();
@@ -634,7 +791,7 @@ function renderMembers(){
 
 /* =====================================================================
    ADMIN PANEL — create organization / group codes
-   Plain, visible admin feature: any admin can see and create these codes.
+   Plain, visible boss feature: any boss can see and create these codes.
    This does NOT grant access to a member's own mail, camera, or screen.
 ===================================================================== */
 function renderAdminPanel(){
@@ -684,20 +841,8 @@ function createGroupCode(){
 }
 
 /* =====================================================================
-   MAIL — demo internal messaging UI
-   Sending real external email (e.g. via Gmail) would require each
-   member's own OAuth login and a separate email API integration.
+   MAIL VIEW RENDERING
 ===================================================================== */
-let mailbox = {
-  inbox: [
-    { from:"Alex Carter", subject:"Next week's standup", snippet:"Moved to Tuesday at 2pm.", body:"Hi team,\n\nNext week's standup has moved to Tuesday at 2pm.\nAgenda to follow shortly.\n\nAlex", time:"09:12", unread:true },
-    { from:"Sam Rivera", subject:"Could you review the proposal?", snippet:"Draft is ready for your feedback", body:"Hi,\n\nThe draft proposal we discussed is ready.\nCould you take a look when you have a moment?\n\nSam", time:"Yesterday", unread:false },
-  ],
-  sent: []
-};
-let currentFolder = 'inbox';
-let selectedMailIndex = null;
-
 function selectFolder(folder, el){
   currentFolder = folder;
   selectedMailIndex = null;
@@ -717,8 +862,9 @@ function renderMailList(){
     const div = document.createElement('div');
     div.className = 'mail-item' + (m.unread ? ' unread' : '') + (selectedMailIndex === idx ? ' selected' : '');
     div.onclick = () => openMail(idx);
+    const reqTag = m.isJoinRequest ? '<span style="font-size:9px;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:1px 5px;margin-right:6px;">REQUEST</span>' : '';
     div.innerHTML = `
-      <div class="mail-from">${currentFolder === 'sent' ? 'To: ' + m.to : m.from}<span class="mail-time">${m.time}</span></div>
+      <div class="mail-from">${reqTag}${currentFolder === 'sent' ? 'To: ' + m.to : m.from}<span class="mail-time">${m.time}</span></div>
       <div class="mail-subject">${m.subject}</div>
       <div class="mail-snippet">${m.snippet}</div>
     `;
@@ -737,6 +883,32 @@ function openMail(idx){
   renderMailList();
 
   const reading = document.getElementById('mailReading');
+
+  if(m.isJoinRequest){
+    const req = joinRequests.find(r => r.id === m.requestId);
+    let actionHtml = '';
+    if(!req || req.status === 'pending'){
+      actionHtml = `
+        <button onclick="approveJoinRequest(${m.requestId})" style="border-color:var(--accent);color:var(--accent);">Approve</button>
+        <button onclick="denyJoinRequest(${m.requestId})" style="border-color:var(--warn);color:var(--warn);">Deny</button>`;
+    } else if(req.status === 'approved'){
+      actionHtml = `<span style="font-size:12px;color:var(--accent);font-family:var(--mono);">✓ Approved — temp password: ${req.tempPassword}</span>`;
+    } else {
+      actionHtml = `<span style="font-size:12px;color:var(--warn);font-family:var(--mono);">✕ Denied</span>`;
+    }
+
+    reading.innerHTML = `
+      <div class="mail-subject-lg">${m.subject}</div>
+      <div class="mail-meta">
+        <div class="mail-meta-from">From: <b>${m.from}</b></div>
+        <div class="mail-meta-from">${m.time}</div>
+      </div>
+      <div class="mail-body">${m.body}</div>
+      <div class="mail-actions">${actionHtml}</div>
+    `;
+    return;
+  }
+
   reading.innerHTML = `
     <div class="mail-subject-lg">${m.subject}</div>
     <div class="mail-meta">
